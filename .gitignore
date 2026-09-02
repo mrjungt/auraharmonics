@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Logs and runtime
+*.log
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

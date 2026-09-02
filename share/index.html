@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraHarmonic ── 互動式身心療癒與聲學合成儀</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+                                        :root {
+            --bg-color: #3e3532;
+            --card-bg: rgba(255, 250, 245, 0.92);
+            --card-border: rgba(197, 179, 157, 0.25);
+            --text-primary: #362e2b;
+            --text-secondary: #7a6e67;
+            --accent-color: #ca7a65;
+            
+            /* 脈輪與頻率專屬漸層 (暖調粉彩) */
+            --color-396: linear-gradient(135deg, #df9f9f, #b97676); /* 海底輪 珊瑚粉紅 */
+            --color-417: linear-gradient(135deg, #e3af8c, #bc8661); /* 本我輪 暖陶土橘 */
+            --color-528: linear-gradient(135deg, #e6d79f, #bfaf75); /* 太陽輪 芥末蜂蜜黃 */
+            --color-639: linear-gradient(135deg, #aebd9c, #859473); /* 心輪 溫暖橄欖綠 */
+            --color-741: linear-gradient(135deg, #a5b7c6, #7a8c9b); /* 喉輪 暖霧天藍 */
+            --color-852: linear-gradient(135deg, #bbaec8, #91829e); /* 眉心輪 暖調紫 */
+            
+            --active-glow: var(--color-417);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #4a3e3b 0%, var(--bg-color) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 脈輪背景發光 */
+        .background-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: var(--active-glow);
+            filter: blur(150px);
+            opacity: 0.1;
+            z-index: -1;
+            transition: background 0.8s ease;
+            pointer-events: none;
+        }
+
+        /* 主版面 */
+        .app-container {
+            width: 100%;
+            max-width: 1060px;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 25px;
+            z-index: 1;
+        }
+
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 通用玻璃面板 */
+        .glass-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 30px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 15px 35px rgba(54, 46, 43, 0.08);
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.5s ease;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- 左面板：分析室 --- */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+                                                textarea {
+            width: 100%;
+            height: 110px;
+            background: #f2e8dc;
+            border: 1px solid rgba(197, 179, 157, 0.25);
+            border-radius: 16px;
+            padding: 15px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        textarea:focus {
+            border-color: rgba(255, 140, 0, 0.5);
+            box-shadow: 0 0 15px rgba(211, 140, 118, 0.20);
+        }
+
+        .analyze-btn {
+            background: var(--active-glow);
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.05);
+        }
+
+        /* 報告輸出區 */
+        .report-display {
+            flex-grow: 1;
+            margin-top: 15px;
+            border-top: 1px solid rgba(197, 179, 157, 0.25);
+            padding-top: 20px;
+            min-height: 250px;
+            overflow-y: auto;
+            max-height: 400px;
+            position: relative;
+        }
+
+        /* 美化滾動條 */
+        .report-display::-webkit-scrollbar {
+            width: 5px;
+        }
+        .report-display::-webkit-scrollbar-thumb {
+            background: rgba(54, 46, 43, 0.10);
+            border-radius: 4px;
+        }
+
+        .placeholder-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 80px;
+            line-height: 1.5;
+        }
+
+        /* 載入動畫 */
+        .loading-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 80px;
+        }
+
+        .pulse-loader {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--active-glow);
+            animation: pulseAnim 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseAnim {
+            0% { transform: scale(0.6); opacity: 0.3; }
+            50% { transform: scale(1); opacity: 0.9; box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); }
+            100% { transform: scale(0.6); opacity: 0.3; }
+        }
+
+        /* 渲染出的報告樣式 */
+        .report-card {
+            text-align: left;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+                                        .report-header {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .report-quote {
+            border-left: 3px solid rgba(197, 179, 157, 0.35);
+            padding-left: 12px;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .report-section {
+            margin-bottom: 18px;
+        }
+
+        .report-section h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .report-section ul {
+            list-style: none;
+            padding-left: 5px;
+        }
+
+        .report-section li {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 6px;
+            position: relative;
+            padding-left: 12px;
+        }
+
+        .report-section li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+
+                                                .report-box {
+            background: #f2e8dc;
+            border: 1px solid rgba(197, 179, 157, 0.20);
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 18px;
+        }
+
+        .report-box p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* --- 右面板：播放器 --- */
+        .right-panel {
+            text-align: center;
+        }
+
+        /* 呼吸球區域 */
+                .visualizer-wrapper {
+            position: relative;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .breath-orb {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--active-glow);
+            box-shadow: 0 5px 25px rgba(54, 46, 43, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.60);
+            transition: background 0.8s ease, box-shadow 0.8s ease;
+            position: relative;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .breath-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            color: #fff;
+            text-align: center;
+            user-select: none;
+        }
+
+        .txt-status {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.95;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        .txt-timer {
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+            line-height: 1;
+        }
+
+        /* SVG 倒數進度環 */
+        .breath-ring {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ring-track {
+            stroke: rgba(197, 179, 157, 0.15);
+            stroke-width: 4px;
+            fill: none;
+        }
+
+        .ring-progress {
+            stroke: var(--accent-color);
+            stroke-width: 4px;
+            fill: none;
+            stroke-linecap: round;
+            stroke-dasharray: 502;
+            stroke-dashoffset: 502;
+            transform: rotate(-90deg);
+            transform-origin: 90px 90px;
+            transition: stroke-dashoffset 0.1s linear, stroke 0.8s ease;
+        }
+
+        /* 能量擴散圈 */
+        .breath-ripple {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            background: transparent;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+            box-sizing: border-box;
+        }
+
+        .visualizer-wrapper.active .ripple-1 {
+            animation: rippleWave 6s infinite ease-out;
+        }
+
+        .visualizer-wrapper.active .ripple-2 {
+            animation: rippleWave 6s infinite ease-out 3s;
+        }
+
+        @keyframes rippleWave {
+            0% { transform: scale(1); opacity: 0.4; border-color: var(--accent-color); }
+            100% { transform: scale(1.6); opacity: 0; border-color: var(--active-glow); }
+        }
+
+        /* 頻率切換鈕 */
+        .frequency-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+                                                .freq-btn {
+            background: rgba(255, 255, 255, 0.70);
+            border: 1px solid rgba(197, 179, 157, 0.25);
+            border-radius: 12px;
+            padding: 10px 5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .freq-btn:hover {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+                                        .freq-btn.active {
+            background: var(--active-glow);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 6px 15px rgba(54, 46, 43, 0.15);
+            font-weight: 600;
+        }
+
+        .freq-btn span {
+            display: block;
+            font-size: 0.65rem;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        /* 控制滑桿區 */
+        .controls-grid {
+            background: rgba(255, 255, 255, 0.45);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.08);
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--active-glow);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+
+        .range-slider {
+            width: 100px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.95);
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+        }
+
+                                .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* 播放控制 */
+        .main-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--active-glow);
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(54, 46, 43, 0.18);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+        }
+
+                                        .timer-select {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(197, 179, 157, 0.25);
+            border-radius: 10px;
+            padding: 8px 10px;
+            color: var(--text-primary);
+            font-size: 0.72rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* 語音按鈕樣式 */
+                                        #micBtn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(197, 179, 157, 0.25);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            outline: none;
+            z-index: 10;
+        }
+
+                                #micBtn:hover {
+            background: rgba(255, 255, 255, 1.00);
+            color: var(--text-primary);
+            transform: scale(1.05);
+        }
+
+        #micBtn.recording {
+            background: #ff4b2b !important;
+            border-color: transparent !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(255, 75, 43, 0.4);
+            animation: micPulse 1.2s infinite alternate;
+        }
+
+        @keyframes micPulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+    
+        
+        /* 背景浮水印樣式 */
+        .bg-watermark {
+            position: fixed;
+            color: var(--text-primary);
+            opacity: 0.05;
+            z-index: -1;
+            pointer-events: none;
+            transition: color 0.8s ease, opacity 0.8s ease;
+        }
+
+        .watermark-left {
+            bottom: -50px;
+            left: -50px;
+            width: 320px;
+            height: 320px;
+        }
+
+        .watermark-right {
+            top: -50px;
+            right: -50px;
+            width: 320px;
+            height: 320px;
+            transform: rotate(-15deg);
+        }
+
+        /* 鎖頭圖示樣式 */
+        .lock-icon {
+            font-size: 0.75rem;
+            margin-left: 3px;
+            opacity: 0.85;
+            transition: display 0.3s;
+        }
+
+        /* 當為 Premium 狀態時隱藏鎖頭 */
+        body.is-premium .lock-icon {
+            display: none !important;
+        }
+
+        /* 付費牆彈窗 */
+        .paywall-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(42, 40, 47, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .paywall-card {
+            width: 90%;
+            max-width: 420px;
+            background: rgba(255, 250, 245, 0.98) !important;
+            border: 1px solid rgba(197, 179, 157, 0.3) !important;
+            border-radius: 28px !important;
+            padding: 30px !important;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(54, 46, 43, 0.25) !important;
+            box-sizing: border-box;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+        }
+
+        .paywall-card h3 {
+            font-size: 1.3rem;
+            color: #362e2b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 700;
+        }
+
+        .paywall-subtitle {
+            font-size: 0.85rem;
+            color: #7a6e67;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .paywall-features {
+            text-align: left;
+            margin: 0 auto 25px auto;
+            max-width: 320px;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .paywall-features li {
+            font-size: 0.82rem;
+            color: #362e2b;
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 22px;
+            line-height: 1.4;
+        }
+
+        .paywall-features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ca7a65;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .paywall-pricing {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .price-box {
+            border: 2px solid rgba(197, 179, 157, 0.2);
+            border-radius: 16px;
+            padding: 12px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        .price-box.active {
+            border-color: #ca7a65;
+            background: rgba(202, 122, 101, 0.05);
+        }
+
+        .price-title {
+            display: block;
+            font-size: 0.68rem;
+            color: #7a6e67;
+            margin-bottom: 4px;
+        }
+
+        .price-val {
+            display: block;
+            font-size: 1.05rem;
+            color: #362e2b;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .price-desc {
+            display: block;
+            font-size: 0.6rem;
+            color: #9a8e87;
+        }
+
+        .pay-btn-action {
+            background: #ca7a65;
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            width: 100%;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(202, 122, 101, 0.25);
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        .pay-btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(202, 122, 101, 0.35);
+        }
+
+        .pay-btn-close {
+            background: transparent;
+            border: none;
+            color: #7a6e67;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: underline;
+            outline: none;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <!-- 15秒模擬付費牆彈窗 -->
+    <div id="paywallModal" class="paywall-overlay" style="display: none;">
+        <div class="paywall-card">
+            <h3>💎 解鎖無限聲學共鳴療癒</h3>
+            <p class="paywall-subtitle">您已完成 15 秒免費試聽。<br>升級完整版解鎖更深度的身心療癒體驗：</p>
+            <ul class="paywall-features">
+                <li>✨ <strong>無限播放時間</strong>，伴您深度冥想或整晚安穩睡眠</li>
+                <li>🧘 <strong>解鎖所有共振頻率</strong>，隨意調節 6 大脈輪音軌</li>
+                <li>🎛️ <strong>自由控制進階音效</strong>，開啟雙耳節拍、海浪、風鈴組合</li>
+            </ul>
+            <div class="paywall-pricing">
+                <div class="price-box active" onclick="selectPrice(this)">
+                    <span class="price-title">訂閱首選</span>
+                    <span class="price-val">NT$ 90 / 月</span>
+                    <span class="price-desc">7天免費試用，隨時取消</span>
+                </div>
+                <div class="price-box" onclick="selectPrice(this)">
+                    <span class="price-title">永久買斷</span>
+                    <span class="price-val">NT$ 290</span>
+                    <span class="price-desc">一次付費，終身擁有</span>
+                </div>
+            </div>
+            <button id="paywallPayBtn" class="pay-btn-action">💳 立即模擬付費解鎖</button>
+            <br>
+            <button id="paywallCloseBtn" class="pay-btn-close">稍後再說</button>
+        </div>
+    </div>
+
+
+    <!-- 背景療癒浮水印 -->
+    <svg class="bg-watermark watermark-left" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.8">
+        <path d="M50,15 C45,35 30,45 10,50 C30,55 45,65 50,85 C55,65 70,55 90,50 C70,45 55,35 50,15 Z" />
+        <path d="M50,25 C47,40 38,47 25,50 C38,53 47,60 50,75 C53,60 62,53 75,50 C62,47 53,40 50,25 Z" opacity="0.7"/>
+        <circle cx="50" cy="50" r="10" stroke-dasharray="2,2" opacity="0.5"/>
+        <circle cx="50" cy="50" r="5" opacity="0.5"/>
+    </svg>
+
+    <svg class="bg-watermark watermark-right" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.8">
+        <path d="M10,90 Q40,50 90,10" />
+        <path d="M35,65 Q20,55 25,45 Q40,55 35,65 Z" />
+        <path d="M50,50 Q40,35 45,28 Q60,38 50,50 Z" />
+        <path d="M68,34 Q60,20 65,15 Q80,22 68,34 Z" />
+        <path d="M42,59 Q60,55 58,45 Q45,50 42,59 Z" />
+        <path d="M58,43 Q75,38 73,28 Q60,33 58,43 Z" />
+    </svg>
+
+
+    <div class="background-glow" id="bgGlow"></div>
+
+    <div class="app-container">
+        
+        <!-- 左側：分析室 -->
+        <div class="glass-panel">
+            <h2>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2Z"></path><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
+                身心智能分析室 (Holistic Advisor)
+            </h2>
+            <div class="input-group">
+                <span class="input-label">請描述您最近遇到的身心困擾、壓力或任何身體的不適：</span>
+                <div style="position: relative; width: 100%;">
+                    <textarea id="symptomInput" placeholder="例如：我的狗失蹤了三天，我現在好急、好難過，整晚失眠，胸口感覺很悶..."></textarea>
+                    <button id="micBtn" title="語音輸入 (Speech-to-Text)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <button class="analyze-btn" id="analyzeBtn">開始身心能量分析</button>
+
+            <!-- 報告呈現區 -->
+            <div class="report-display" id="reportDisplay">
+                <div class="placeholder-text" id="placeholderTxt">
+                    輸入身心狀況後，系統將自動為您解析身心能量對應，<br>
+                    並自動載入且播放最適合您的 1 分鐘生成式療癒音樂。
+                </div>
+                <div class="loading-container" id="loadingBox">
+                    <div class="pulse-loader"></div>
+                    <div style="font-size:0.85rem; color:var(--text-secondary);">正在讀取身心能量對應...</div>
+                </div>
+                <div id="reportOutput"></div>
+            </div>
+        </div>
+
+        <!-- 右側：播放器 -->
+        <div class="glass-panel right-panel">
+            <h2>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2Z"></path><path d="M9 17V7l10 5-10 5Z"></path></svg>
+                生成式聲學調頻器 (Sound Harmonizer)
+            </h2>
+
+            <div class="visualizer-wrapper">
+                <div class="breath-ripple ripple-1" id="ripple1"></div>
+                <div class="breath-ripple ripple-2" id="ripple2"></div>
+                <svg class="breath-ring" viewBox="0 0 180 180">
+                    <circle class="ring-track" cx="90" cy="90" r="80" />
+                    <circle class="ring-progress" id="breathProgress" cx="90" cy="90" r="80" />
+                </svg>
+                <div class="breath-orb" id="breathOrb">
+                    <div class="breath-content">
+                        <span id="breathTxt" class="txt-status">點擊播放</span>
+                        <span id="breathTimer" class="txt-timer"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 頻率按鈕組 -->
+            <div class="frequency-selector">
+                <button class="freq-btn" data-freq="396">396 Hz <span class="lock-icon">🔒</span><span>海底輪</span></button>
+                <button class="freq-btn" data-freq="417">417 Hz <span class="lock-icon">🔒</span><span>本我輪</span></button>
+                <button class="freq-btn" data-freq="528">528 Hz<span>太陽輪</span></button>
+                <button class="freq-btn" data-freq="639">639 Hz <span class="lock-icon">🔒</span><span>心輪</span></button>
+                <button class="freq-btn" data-freq="741">741 Hz <span class="lock-icon">🔒</span><span>喉輪</span></button>
+                <button class="freq-btn" data-freq="852">852 Hz <span class="lock-icon">🔒</span><span>眉心輪</span></button>
+            </div>
+
+            <!-- 說明卡 -->
+            <div class="freq-info-card">
+                <div class="freq-info-title" id="infoTitle">417 Hz ─ 療癒水波音樂</div>
+                <div class="freq-info-desc" id="infoDesc">融合海浪潮汐與溫慢和弦，搭載 417Hz 的療癒音軌。能溫和地清理焦躁不安與突發事件帶來的負面創傷，幫助心情重歸平穩。</div>
+            </div>
+
+            <!-- 音量與定時 -->
+            <div class="controls-grid">
+                <div class="control-row">
+                    <span class="control-label">雙耳節拍腦波 (Theta 4Hz)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="binauralToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">大自然海浪背景聲</span>
+                    <label class="switch">
+                        <input type="checkbox" id="waveToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">4-7-8 呼呼吸動畫指引</span>
+                    <label class="switch">
+                        <input type="checkbox" id="breathToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">音量大小</span>
+                    <input type="range" class="range-slider" id="volSlider" min="0" max="1.0" step="0.01" value="0.50">
+                </div>
+            </div>
+
+            <div class="main-controls">
+                <select class="timer-select" id="timerSelect">
+                    <option value="1" selected>1 分鐘試聽</option>
+                    <option value="5">5 分鐘 🔒</option>
+                    <option value="15">15 分鐘 🔒</option>
+                    <option value="30">30 分鐘 🔒</option>
+                    <option value="0">持續生成 🔒</option>
+                </select>
+
+                <button class="play-btn" id="playBtn">
+                    <svg id="playSvg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <svg id="pauseSvg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                </button>
+            </div>
+            <div class="bottom-note">
+                提示：點擊「身心分析」可自動開啟聲學共振，配戴耳機效果更佳。
+                <br>
+                <a href="#" id="devResetBtn" style="color: var(--accent-color); font-size: 0.75rem; text-decoration: underline; margin-top: 5px; display: inline-block;">[測試專用] 重置為免費版 (15秒限制)</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 頻率資料庫
+        const freqDb = {
+            396: {
+                title: "396 Hz ─ 大地接地安神音樂 (海底輪)",
+                desc: "低沈溫厚的 G 小調和弦襯底，融合深海潮汐。專門用於釋放潛意識的生存恐懼、不安全感（如丟失心愛寵物/財物），將能量安穩地帶回大地。",
+                gradient: "linear-gradient(135deg, #ff416c, #ff4b2b)",
+                glow: "#ff416c",
+                accent: "#ff416c",
+                chakra: "海底輪 (Root Chakra)",
+                notes: [99, 132, 165, 198, 297],
+                chimes: [396, 495, 594, 792, 990]
+            },
+            417: {
+                title: "417 Hz ─ 療癒水波清理音樂 (本我輪)",
+                desc: "融合柔和的 F 小調和弦與清脆風鈴。能有效清理突發變故（如車子被撞/找不到人）所帶來的負面懊惱、委屈與火氣，讓堵塞能量重新流動。",
+                gradient: "linear-gradient(135deg, #ff8c00, #e52d27)",
+                glow: "#ff8c00",
+                accent: "#ff8c00",
+                chakra: "本我輪 (Sacral Chakra)",
+                notes: [104, 139, 167, 208, 278],
+                chimes: [417, 521, 625, 834, 1042]
+            },
+            528: {
+                title: "528 Hz ─ 奇蹟細胞修復音樂 (太陽輪)",
+                desc: "明亮溫馨的 C 大調和弦，結合空靈水晶聲。能安撫壓力引發的胃部不適、消化不良，修復精神疲勞，帶來溫暖的陽光能量與愛。",
+                gradient: "linear-gradient(135deg, #ffe259, #ffa751)",
+                glow: "#ffe259",
+                accent: "#ffa751",
+                chakra: "太陽輪 (Solar Plexus Chakra)",
+                notes: [132, 165, 198, 264, 330],
+                chimes: [528, 660, 792, 1056, 1320]
+            },
+            639: {
+                title: "639 Hz ─ 心輪和諧敞開音樂 (心輪)",
+                desc: "溫柔舒緩的 F 大調和弦與綿密的粉紅海浪。敞開緊繃的胸口，化解討好與關係焦慮，培育對自我的關愛。",
+                gradient: "linear-gradient(135deg, #11998e, #38ef7d)",
+                glow: "#11998e",
+                accent: "#38ef7d",
+                chakra: "心輪 (Heart Chakra)",
+                notes: [106, 160, 213, 267, 320],
+                chimes: [639, 800, 960, 1280, 1600]
+            },
+            741: {
+                title: "741 Hz ─ 喉輪清毒表達音樂 (喉輪)",
+                desc: "澄澈的 G 大調和弦配合金屬音頻。清利咽喉卡頓與不敢為自己發聲的憋屈，提升創造力與直覺力。",
+                gradient: "linear-gradient(135deg, #00c6ff, #0072ff)",
+                glow: "#00c6ff",
+                accent: "#00c6ff",
+                chakra: "喉輪 (Throat Chakra)",
+                notes: [123, 185, 247, 370, 494],
+                chimes: [741, 926, 1111, 1482, 1852]
+            },
+            852: {
+                title: "852 Hz ─ 消除思緒雜念音樂 (眉心輪)",
+                desc: "空靈玄妙的降 A 大調和弦與遙遠的天使風鈴聲。能快速平息大腦中不停回放的雜念，適合失眠與思緒停不下來的人。",
+                gradient: "linear-gradient(135deg, #7f00ff, #e100ff)",
+                glow: "#7f00ff",
+                accent: "#e100ff",
+                chakra: "眉心輪 (Third Eye Chakra)",
+                notes: [106, 159, 213, 318, 426],
+                chimes: [852, 1065, 1278, 1704, 2130]
+            }
+        };
+
+        
+        // --- 付費牆模擬邏輯變數 ---
+        let isPremium = false; // 測試版本：重整網頁一律預設為免費試用版，確保 100% 觸發 15 秒限制
+        let freeTrialTimeout = null;
+        let freeTrialVolumeInterval = null;
+        
+        if (isPremium) {
+            document.body.classList.add('is-premium');
+        }
+
+        function showPaywall() {
+            document.getElementById('paywallModal').style.display = 'flex';
+        }
+
+        function hidePaywall() {
+            document.getElementById('paywallModal').style.display = 'none';
+        }
+
+        function unlockPremium() {
+            isPremium = true;
+            localStorage.setItem('auraPremium', 'true');
+            document.body.classList.add('is-premium');
+            
+            // 移除計時器中的鎖頭符號顯示
+            const options = timerSelect.options;
+            for (let i = 0; i < options.length; i++) {
+                options[i].text = options[i].text.replace(' 🔒', '');
+            }
+            
+            hidePaywall();
+            alert('🎉 付費成功！已解鎖無限聲學共鳴與完整脈輪調頻功能！');
+            
+            if (isPlaying) {
+                stopAll();
+                startAll();
+            }
+        }
+        
+        // 用於切換付費視窗的方案選擇效果
+        window.selectPrice = function(el) {
+            document.querySelectorAll('.price-box').forEach(box => box.classList.remove('active'));
+            el.classList.add('active');
+        }
+    
+        // DOM Elements
+        const playBtn = document.getElementById('playBtn');
+        const playSvg = document.getElementById('playSvg');
+        const pauseSvg = document.getElementById('pauseSvg');
+        const breathOrb = document.getElementById('breathOrb');
+        const breathTxt = document.getElementById('breathTxt');
+        const bgGlow = document.getElementById('bgGlow');
+        const binauralToggle = document.getElementById('binauralToggle');
+        const waveToggle = document.getElementById('waveToggle');
+        const breathToggle = document.getElementById('breathToggle');
+        const volSlider = document.getElementById('volSlider');
+        const timerSelect = document.getElementById('timerSelect');
+        const infoTitle = document.getElementById('infoTitle');
+        const infoDesc = document.getElementById('infoDesc');
+
+        const symptomInput = document.getElementById('symptomInput');
+        const micBtn = document.getElementById('micBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const placeholderTxt = document.getElementById('placeholderTxt');
+        const loadingBox = document.getElementById('loadingBox');
+        const reportOutput = document.getElementById('reportOutput');
+
+        let currentFreq = 417; 
+        let isPlaying = false;
+
+        // Web Audio API
+        let audioCtx = null;
+        let mainGain = null;
+        let waveNode = null;
+        let waveGain = null;
+        let lfoNode = null;
+        let activeOscs = [];
+        
+        let padInterval = null;
+        let chimeTimeout = null;
+        let breathInterval = null;
+        let timerTimeout = null;
+
+        // 初始化 UI
+        setFrequencyUI(currentFreq);
+
+        // 監聽頻率選擇按鈕
+        document.querySelectorAll('.freq-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const freq = parseInt(btn.dataset.freq);
+                if (!isPremium && freq !== 528) {
+                    showPaywall();
+                    return;
+                }
+                if (currentFreq !== freq) {
+                    currentFreq = freq;
+                    setFrequencyUI(freq);
+                    if (isPlaying) {
+                        stopAudio();
+                        startAudio();
+                    }
+                }
+            });
+        });
+
+        function setFrequencyUI(freq) {
+            document.querySelectorAll('.freq-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.freq) === freq);
+            });
+            const info = freqDb[freq];
+            infoTitle.innerText = info.title;
+            infoDesc.innerText = info.desc;
+            document.documentElement.style.setProperty('--active-glow', info.gradient);
+            document.documentElement.style.setProperty('--accent-color', info.accent);
+            bgGlow.style.background = info.gradient;
+        }
+
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                stopAll();
+            } else {
+                startAll();
+            }
+        });
+
+        volSlider.addEventListener('input', () => {
+            if (mainGain && audioCtx) {
+                mainGain.gain.setValueAtTime(volSlider.value, audioCtx.currentTime);
+            }
+        });
+
+        binauralToggle.addEventListener('change', () => {
+            if (isPlaying) {
+                stopAudio();
+                startAudio();
+            }
+        });
+
+        waveToggle.addEventListener('change', () => {
+            if (isPlaying) {
+                if (waveToggle.checked) {
+                    startOceanWaves();
+                } else {
+                    stopOceanWaves();
+                }
+            }
+        });
+
+        function startAll() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            isPlaying = true;
+            playSvg.style.display = 'none';
+            playBtn.style.background = 'var(--active-glow)';
+            pauseSvg.style.display = 'block';
+
+            console.log("【偵錯】播放啟動。當前 premium 狀態為:", isPremium);
+
+            startAudio();
+            startBreathGuide();
+            startTimer();
+
+            // 15 秒免費試聽付費牆計時器
+            if (!isPremium) {
+                console.log("【偵錯】啟動 15 秒免費試用計時器...");
+                if (freeTrialTimeout) clearTimeout(freeTrialTimeout);
+                if (freeTrialVolumeInterval) clearInterval(freeTrialVolumeInterval);
+
+                freeTrialTimeout = setTimeout(() => {
+                    console.log("【偵錯】已達 12 秒，開始 3 秒音量淡出...");
+                    let steps = 0;
+                    const originalVal = parseFloat(volSlider.value);
+                    freeTrialVolumeInterval = setInterval(() => {
+                        steps++;
+                        if (steps <= 30) {
+                            const cur = originalVal * (1 - steps / 30);
+                            if (mainGain) {
+                                mainGain.gain.setValueAtTime(cur, audioCtx.currentTime);
+                            }
+                        } else {
+                            clearInterval(freeTrialVolumeInterval);
+                        }
+                    }, 100);
+
+                    // 15 秒一到，正式停止
+                    setTimeout(() => {
+                        console.log("【偵錯】已達 15 秒，觸發停止播放與彈出付費牆！");
+                        if (isPlaying && !isPremium) {
+                            stopAll();
+                            showPaywall();
+                        }
+                    }, 3000);
+                }, 12000);
+            }
+        }
+
+        function stopAll() {
+            isPlaying = false;
+            playSvg.style.display = 'block';
+            pauseSvg.style.display = 'none';
+
+            // 清除試聽計時器
+            if (freeTrialTimeout) { clearTimeout(freeTrialTimeout); freeTrialTimeout = null; }
+            if (freeTrialVolumeInterval) { clearInterval(freeTrialVolumeInterval); freeTrialVolumeInterval = null; }
+
+            stopAudio();
+            stopBreathGuide();
+            if (timerTimeout) {
+                clearTimeout(timerTimeout);
+                timerTimeout = null;
+            }
+            breathTxt.innerText = "音樂已停止";
+        }
+
+        function startAudio() {
+            try {
+                mainGain = audioCtx.createGain();
+                mainGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                mainGain.gain.linearRampToValueAtTime(volSlider.value, audioCtx.currentTime + 1.0);
+                mainGain.connect(audioCtx.destination);
+
+                if (waveToggle.checked) {
+                    startOceanWaves();
+                }
+                startGenerativeMusic();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function startOceanWaves() {
+            try {
+                const bufferSize = 2 * audioCtx.sampleRate;
+                const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+
+                waveNode = audioCtx.createBufferSource();
+                waveNode.buffer = noiseBuffer;
+                waveNode.loop = true;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.Q.setValueAtTime(1.5, audioCtx.currentTime);
+
+                lfoNode = audioCtx.createOscillator();
+                lfoNode.type = 'sine';
+                lfoNode.frequency.setValueAtTime(0.08, audioCtx.currentTime); 
+
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.setValueAtTime(250, audioCtx.currentTime); 
+
+                lfoNode.connect(lfoGain);
+                lfoGain.connect(filter.frequency);
+                filter.frequency.setValueAtTime(350, audioCtx.currentTime); 
+
+                waveGain = audioCtx.createGain();
+                waveGain.gain.setValueAtTime(0.25, audioCtx.currentTime); 
+
+                waveNode.connect(filter);
+                filter.connect(waveGain);
+                waveGain.connect(mainGain);
+
+                waveNode.start(0);
+                lfoNode.start(0);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function stopOceanWaves() {
+            if (waveNode) { try { waveNode.stop(); } catch(e){} waveNode = null; }
+            if (lfoNode) { try { lfoNode.stop(); } catch(e){} lfoNode = null; }
+        }
+
+        function startGenerativeMusic() {
+            const config = freqDb[currentFreq];
+            const notes = config.notes;
+
+            function playPadChord() {
+                const now = audioCtx.currentTime;
+                const duration = 7.0;
+
+                const chordNotes = [];
+                const shuffled = [...notes].sort(() => 0.5 - Math.random());
+                chordNotes.push(shuffled[0]);
+                chordNotes.push(shuffled[1]);
+                chordNotes.push(shuffled[2]);
+
+                const useBinaural = binauralToggle.checked;
+
+                chordNotes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const oscGain = audioCtx.createGain();
+                    osc.type = 'triangle';
+
+                    const detuneValue = (idx - 1) * 8; 
+                    osc.frequency.setValueAtTime(freq, now);
+                    osc.detune.setValueAtTime(detuneValue, now);
+
+                    oscGain.gain.setValueAtTime(0, now);
+                    oscGain.gain.linearRampToValueAtTime(0.20, now + 2.5); 
+                    oscGain.gain.setValueAtTime(0.20, now + duration - 2.5);
+                    oscGain.gain.linearRampToValueAtTime(0, now + duration);
+
+                    if (useBinaural && idx === 0) {
+                        const rightOsc = audioCtx.createOscillator();
+                        rightOsc.type = 'triangle';
+                        rightOsc.frequency.setValueAtTime(freq + 4, now);
+                        
+                        const merger = audioCtx.createChannelMerger(2);
+                        osc.connect(merger, 0, 0);      
+                        rightOsc.connect(merger, 0, 1); 
+                        
+                        merger.connect(oscGain);
+                        rightOsc.start(now);
+                        rightOsc.stop(now + duration);
+                        activeOscs.push(rightOsc);
+                    } else {
+                        osc.connect(oscGain);
+                    }
+
+                    oscGain.connect(mainGain);
+                    osc.start(now);
+                    osc.stop(now + duration);
+
+                    activeOscs.push(osc);
+                });
+            }
+
+            playPadChord();
+            padInterval = setInterval(playPadChord, 6000);
+
+            const chimes = config.chimes;
+            function triggerRandomChime() {
+                if (!isPlaying) return;
+                const now = audioCtx.currentTime;
+                const freq = chimes[Math.floor(Math.random() * chimes.length)];
+
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                const chimeGain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(freq, now);
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(freq * 1.503, now); 
+
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(2000, now);
+
+                chimeGain.gain.setValueAtTime(0, now);
+                chimeGain.gain.linearRampToValueAtTime(0.15, now + 0.005); 
+                chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 4.5); 
+
+                osc1.connect(filter);
+                osc2.connect(filter);
+                filter.connect(chimeGain);
+                chimeGain.connect(mainGain);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 5.0);
+                osc2.stop(now + 5.0);
+
+                activeOscs.push(osc1, osc2);
+
+                const nextInterval = 4000 + Math.random() * 4000;
+                chimeTimeout = setTimeout(triggerRandomChime, nextInterval);
+            }
+
+            chimeTimeout = setTimeout(triggerRandomChime, 3000);
+        }
+
+        function stopAudio() {
+            stopOceanWaves();
+            if (padInterval) { clearInterval(padInterval); padInterval = null; }
+            if (chimeTimeout) { clearTimeout(chimeTimeout); chimeTimeout = null; }
+
+            if (mainGain && audioCtx) {
+                try {
+                    const fadeOutTime = 0.8;
+                    mainGain.gain.setValueAtTime(mainGain.gain.value, audioCtx.currentTime);
+                    mainGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + fadeOutTime);
+                    const oscsToStop = [...activeOscs];
+                    activeOscs = [];
+                    setTimeout(() => {
+                        oscsToStop.forEach(osc => { try { osc.stop(); } catch(e){} });
+                    }, fadeOutTime * 1000);
+                } catch(e) {}
+            }
+        }
+
+        let breathTicking = false;
+        let breathAnimFrame = null;
+        let breathStartTime = 0;
+
+        function startBreathGuide() {
+            const breathTimer = document.getElementById("breathTimer");
+            if (!breathToggle.checked) {
+                breathOrb.style.transform = "scale(1)";
+                breathTxt.innerText = "生成式療癒音樂中";
+                if (breathTimer) breathTimer.innerText = "";
+                document.getElementById("breathProgress").style.strokeDashoffset = 502;
+                document.querySelector(".visualizer-wrapper").classList.remove("active");
+                return;
+            }
+            
+            document.querySelector(".visualizer-wrapper").classList.add("active");
+            breathTicking = true;
+            breathStartTime = Date.now();
+            
+            const progressRing = document.getElementById("breathProgress");
+            const circumference = 502;
+            
+            function tick() {
+                if (!isPlaying || !breathToggle.checked || !breathTicking) return;
+                
+                const now = Date.now();
+                const totalCycle = 19000; // 4s inhale, 7s hold, 8s exhale
+                let elapsed = (now - breathStartTime) % totalCycle;
+                
+                let phase = "";
+                let phaseElapsed = 0;
+                let phaseDuration = 0;
+                let scale = 1.0;
+                
+                if (elapsed < 4000) {
+                    phase = "inhale";
+                    phaseElapsed = elapsed;
+                    phaseDuration = 4000;
+                    scale = 1.0 + (phaseElapsed / phaseDuration) * 0.4;
+                } else if (elapsed < 11000) {
+                    phase = "hold";
+                    phaseElapsed = elapsed - 4000;
+                    phaseDuration = 7000;
+                    scale = 1.4 + Math.sin(phaseElapsed * 0.003) * 0.03;
+                } else {
+                    phase = "exhale";
+                    phaseElapsed = elapsed - 11000;
+                    phaseDuration = 8000;
+                    scale = 1.4 - (phaseElapsed / phaseDuration) * 0.4;
+                }
+                
+                breathOrb.className = "breath-orb " + phase;
+                breathOrb.style.transform = `scale(${scale})`;
+                
+                const secondsLeft = Math.ceil((phaseDuration - phaseElapsed) / 1000);
+                if (breathTimer) breathTimer.innerText = secondsLeft;
+                
+                if (phase === "inhale") {
+                    breathTxt.innerText = "吸氣";
+                    const offset = circumference - (circumference * (phaseElapsed / phaseDuration));
+                    if (progressRing) progressRing.style.strokeDashoffset = offset;
+                } else if (phase === "hold") {
+                    breathTxt.innerText = "屏息";
+                    if (progressRing) progressRing.style.strokeDashoffset = 0;
+                } else if (phase === "exhale") {
+                    breathTxt.innerText = "吐氣";
+                    const offset = circumference * (phaseElapsed / phaseDuration);
+                    if (progressRing) progressRing.style.strokeDashoffset = offset;
+                }
+                
+                breathAnimFrame = requestAnimationFrame(tick);
+            }
+            
+            tick();
+        }
+
+        function stopBreathGuide() {
+            const breathTimer = document.getElementById("breathTimer");
+            breathTicking = false;
+            if (breathAnimFrame) {
+                cancelAnimationFrame(breathAnimFrame);
+                breathAnimFrame = null;
+            }
+            const wrapper = document.querySelector(".visualizer-wrapper");
+            if (wrapper) wrapper.classList.remove("active");
+            breathOrb.className = "breath-orb";
+            breathOrb.style.transform = "scale(1)";
+            if (breathTimer) breathTimer.innerText = "";
+            const progressRing = document.getElementById("breathProgress");
+            if (progressRing) {
+                progressRing.style.strokeDashoffset = 502;
+            }
+        }
+
+        breathToggle.addEventListener('change', () => {
+            stopBreathGuide();
+            if (isPlaying) { startBreathGuide(); }
+        });
+
+        function startTimer() {
+            if (timerTimeout) { clearTimeout(timerTimeout); }
+            const min = parseInt(timerSelect.value);
+            if (min > 0) {
+                timerTimeout = setTimeout(() => {
+                    if (isPlaying) {
+                        stopAll();
+                        alert(`已完成 ${min} 分鐘的生成式聲學音樂療癒，願您重獲平靜。`);
+                    }
+                }, min * 60 * 1000);
+            }
+        }
+
+        timerSelect.addEventListener('change', () => {
+            const min = parseInt(timerSelect.value);
+            if (!isPremium && min !== 1) {
+                timerSelect.value = "1";
+                showPaywall();
+                return;
+            }
+            if (isPlaying) { startTimer(); }
+        });
+
+        // --- 密碼化本地分析引擎 (Base64 加密防拷貝) ---
+        const b64Data = "eyIzOTYiOnsia2V5d29yZHMiOlsi54uXIiwi6LKTIiwi5a+154mpIiwi5LiN6KaLIiwi5LifIiwi5aSx6LmkIiwi6LKh5YuZIiwi6YeR6YyiIiwi5a6J5YWo5oSfIiwi5LiL6IOMIiwi5LiL6IWwIiwi6Iad6JOLIiwi54Sh5YqbIiwi5oCVIl0sInRoZW1lIjoiMzk2IEh6IOWkp+WcsOaOpeWcsOWuieelnumfs+aogiIsInN5bVRhZyI6IuS4i+iDjOmDqOWDteehrOOAgeiGneiTi+eEoeWKm+OAgeW/g+aFjOawo+S/gyIsImVtb1RhZyI6IuWkseWOu+agueWfuueahOeEpuaFruOAgeaBkOaHvOOAgeWFp+eWmuiIh+iHquiyrCIsIm1hcHBpbmdEZXNjIjoi5rW35bqV6Lyq5piv55Sf5a2Y5a6J5YWo5oSf55qE5qC55Z+644CC5a+154mp5aSx6Lmk5oiW6LKh54mp5pCN5aSx5pyD55u05o6l5YuV5pCW5oiR5YCR55qE5a6J5YWo5qC55Z+677yM5bCO6Ie05b+D56We6aOE5b+944CB5by354OI5oGQ5oWM44CCMzk2SHog6IO95byV5bCO6IO96YeP5rKJ6ZmN44CB6IiH5aSn5Zyw6YeN5paw6YCj57WQ77yM6YeL5pS+44CO5om+5LiN5Yiw54mg44CP5oiW44CO5YGa6Yyv5rG65a6a44CP55Si55Sf55qE6Ieq6LKs44CCIiwibGVzc29uIjoi5Zyo5LiN5Y+v5o6n55qE5YiG6Zui6IiH6K6K5pWF5Lit6YeN5paw6Ieq5oiR5a6a6Yyo77yM6YeL5pS+5LiN55CG5oCn55qE6Ieq6LKs44CCIiwicm9vdENhdXNlIjoi5bCH5LiN5a6J5YWo5oSf6IiH6Ieq5oiR5YO55YC86YGO5bqm57aB5a6a44CC55W26YCj57WQ5Lit5pa35pmC77yM5r2b5oSP6K2Y5ZWf5YuV5LqG5by354OI55qE55Sf5a2Y6Ziy6KGb77yI5oGQ5oe86IiH6Ieq6LKs77yJ77yM5L2/5oKo6Zm35YWl54Sh5rOV6Ieq5ouU55qE54Sm5oWu5b6q55Kw44CCIiwiYWZmaXJtYXRpb24iOiLmiJHph4vmlL7mgZDmh7zoiIfoh6rosqzjgILmiJHlkozmiJHnmoTmiYDmhJvlnKjog73ph4/kuIrmsLjpgaDnm7jpgKPjgILmiJHmmK/lronlhajkuJTouI/lr6bnmoTjgIIifSwiNDE3Ijp7ImtleXdvcmRzIjpbIuaSniIsIui7iiIsIueUn+awoyIsIuaJk+S6uiIsIuaDs+aJk+S6uiIsIuW/g+aDheW+iOW3riIsIuawo+aGpCIsIuWnlOWxiCIsIueqgeeZvCIsIuaEj+WkliIsIuS4jeWFrOW5syIsIui7iuemjSIsIuaAkuawoyJdLCJ0aGVtZSI6IjQxNyBIeiDnmYLnmZLmsLTms6LmuIXnkIbpn7PmqIIiLCJzeW1UYWciOiLog7jlj6PnmbznhrHjgIHpm5nmiYvnt4rnuYPmj6Hmi7PjgIHlkbzlkLjmgKXkv4MiLCJlbW9UYWciOiLmpbXluqbmhqTmgJLjgIHmjKvmipjmhJ/jgIHnhKHlipvmhJ/jgIHnlobnlYzooqvkvrXniq/nmoTmhovlsYgiLCJtYXBwaW5nRGVzYyI6IuacrOaIkei8quixoeW+teaIkeWAkeeahOWAi+S6uumCiueVjOiIh+ihjOWLleWKm+OAgui7iuWtkOiiq+aSnuetieeqgeeZvOS4jeWFrOS6i+S7tu+8jOa9m+aEj+itmOacg+imlueCuuOAjumCiueVjOiiq+eEoeerr+S+teeKr+OAj++8jOmAsuiAjOacrOiDveWcsOWVn+WLleOAjuaIsOaIlumAg+OAj+eahOaUu+aTiuihneWLle+8iOaDs+aJk+S6uu+8ieOAgjQxN0h6IOiDvea6q+WSjOeWj+WwjumAmeiCoea7vueHmeeahOeBq+awo++8jOa4heeQhuWJteWCt+OAgiIsImxlc3NvbiI6IuWtuOe/kuWcqOWkseaOp+OAgeS4jeWFrOeahOeqgeeZvOS6i+S7tuS4remHjeaWsOiHquaIkeWumumMqO+8jOmHi+aUvuWwjee1leWwjeaOjOaOp+eahOWft+iRl+OAgiIsInJvb3RDYXVzZSI6IuaGpOaAkuaYr+eCuuS6huaOqeiTi+OAjueEoeazleaOjOaOp+WkluWcqOiuiuaVuOOAj+eahOiiq+WLleiIh+eEoeWKm+aEn+OAguWmguaenOW8t+ihjOWjk+aKkeaIluS7peaatOWKm+Wuo+a0qemAmeiCoeiDvemHj++8jOacgOe1guWPquacg+S6jOasoeWCt+Wus+aCqOeahOi6q+W/g+OAgiIsImFmZmlybWF0aW9uIjoi5oiR5YWB6Kix6Ieq5bex55Sf5rCj77yM5L2G5oiR5ouS57WV55So5Yil5Lq655qE6Yyv6Kqk5oey572w5oiR6Ieq5bex55qE6Lqr6auU44CC5oiR5piv5a6J5YWo55qE77yM5oiR5Y+v5Lul5oWi5oWi5bmz5oGv44CCIn0sIjUyOCI6eyJrZXl3b3JkcyI6W10sInRoZW1lIjoiNTI4IEh6IOWlh+i5n+e0sOiDnuS/ruW+qemfs+aogiIsInN5bVRhZyI6IuaXpeW4uOeyvuelnueWsuWLnuOAgea2iOWMluiIh+iDvemHj+mYu+a7ryIsImVtb1RhZyI6IueEpuaFruOAgeW/g+elnuS4jeWvp+OAgemBjuW6pue3iue5gyIsIm1hcHBpbmdEZXNjIjoi6IOD6YOo6IiH5aSq6Zm956We57aT5Y+i5Luj6KGo5oiR5YCR5ZC45pS25aSW5Zyo5LqL5Lu255qE6IO95Yqb44CC55W25aSW55WM6LOH6KiK5oiW5aOT5Yqb6YGO6LyJ5pmC77yM6IOD6YOo5pyD57eK57iu44CCNTI4SHog55qE6IO96YeP5oyv6aC75bCI5rOo5pa86IiS57ep5aSq6Zm956We57aT5Y+i55qE5aOT6L+r77yM6Kq/56+A5Ymv5Lqk5oSf56We57aT77yM5Y2U5Yqp6IOD6YOo5bmz5ruR6IKM6YeN5paw5pS+6ayG44CCIiwibGVzc29uIjoi5a245pyD5pS+5omL77yM6Iej5pyN5pa855W25LiL77yM5L+h5Lu75LqL5oOF5pyD5pyJ5pyA5aW955qE5a6J5o6S44CCIiwicm9vdENhdXNlIjoi6Kmm5ZyW5o6M5o6n55Sf5rS75Lit55qE5q+P5LiA5Lu25bCP5LqL77yM5bCN5pyq55+l55Si55Sf5oqX5ouS6IiH54Sm5oWu44CC6YCZ6IKh57eK57mD5oSf55u05o6l5aOT6L+r5LqG5oKo55qE5raI5YyW57O757Wx77yM5bCO6Ie06Lqr6auU55m85Ye644CO6KuL5YGc5q2i6YGO5bqm6LKg6I2344CP55qE6KiK6Jmf44CCIiwiYWZmaXJtYXRpb24iOiLmiJHlhYHoqLHoh6rlt7HmlL7kuIvkuI3lsazmlrzmiJHnmoTmjqfliLbvvIzmiJHmmK/lronlhajnmoTvvIzmiJHooqvlroflrpnmuqvmn5TlnLDmlK/mjIHokZfjgIIifSwiNjM5Ijp7ImtleXdvcmRzIjpbIumbo+mBjiIsIuWCt+W/gyIsIuW/g+eXmyIsIuiDuOWPoyIsIuiDuOaCtiIsIuWTrSIsIuaEmyIsIuWIhuaJiyIsIuWQteaetiIsIumXnOS/giIsIuekvuS6pCJdLCJ0aGVtZSI6IjYzOSBIeiDlv4PovKrlkozoq6fmlZ7plovpn7PmqIIiLCJzeW1UYWciOiLog7jlj6Pmsonph43nt4rnuYPjgIHnqpLmga/mhJ/jgIHnnLznnLbnmbzphbgiLCJlbW9UYWciOiLmgrLlgrfjgIHlpLHokL3mhJ/jgIHlraTllq7jgIHnpL7kuqTmiJbmg4XmhJ/nhKbmha4iLCJtYXBwaW5nRGVzYyI6IuW/g+i8quS7o+ihqOaEm+iIh+S6uumam+mXnOS/gueahOmAo+e1kOOAgumBremBh+WQteaetuOAgeWIhuaJi+aIluaDheaEn+mHjeWJteaZgu+8jOiDuOWPo+acg+WDj+WhnuS6humHjeeJqeiIrOe3iue5g+OAgjYzOUh6IOiDveS7pea6q+aflOeahOWkp+iqv+WSjOW8pu+8jOi7n+WMlumYsuempuapn+WItu+8jOaVnumWi+e3iumWieeahOW/g+aJie+8jOW4tuS+huWvrOaBleiIh+iHquaEm+eahOiDvemHj+OAgiIsImxlc3NvbiI6IuWfueiCsuWwjeiHquW3seiIh+S7luS6uueahOaFiOaCsuW/g++8jOeQhuino+iQrOeJqemAo+e1kO+8jOe3tOe/kuWBpeW6t+iHquaEm+OAgiIsInJvb3RDYXVzZSI6IuWus+aAleiiq+mBuuajhOaIlue/kuaFo+WcqOS6uumam+S4reWjk+aKkeiHquaIkemcgOaxgu+8iOiojuWlveWei+S6uuagvO+8ieOAgueVtuaDheaEn+mAo+e1kOWPl+aMq+aZgu+8jOi6q+mrlOWwh+mAmeiCoeaCsuWCt+WMlueCuueUn+eQhuS4iueahOiDuOaCtuiIh+eqkuaBr+aEn+OAgiIsImFmZmlybWF0aW9uIjoi5oiR5pWe6ZaL5b+D5omJ77yM57Wm5LqI5Lim5o6l5Y+X5oSb44CC5oiR54Sh5qKd5Lu25Zyw5oSb5Lim5o6l57SN5Y6f5pys55qE6Ieq5bex44CCIn0sIjc0MSI6eyJrZXl3b3JkcyI6WyLllonlmqgiLCLoqqrkuI3lh7oiLCLooajpgZQiLCLogbLpn7MiLCLoqqroqbEiLCLmhJ/lhpIiLCLlkrPll70iLCLlm7rln7ciLCLnmbzogbIiXSwidGhlbWUiOiI3NDEgSHog5ZaJ6Lyq5riF5q+S6KGo6YGU6Z+z5qiCIiwic3ltVGFnIjoi5ZaJ5Zqo57eK57iu5Y2h6aCT44CB5ZK95ZaJ6IWr55eb44CB5oWi5oCn5ZKz5Ze9IiwiZW1vVGFnIjoi6KGo6YGU5Y+X6Zi744CB5pWi5oCS5LiN5pWi6KiA44CB5Zu65Z+36Ziy6KGbIiwibWFwcGluZ0Rlc2MiOiLllonlmqjku6PooajmiJHlgJHnmoTnnJ/lr6bnmbzogbLoiIflibXpgKDlipvjgILnlbbmiJHlgJHmlaLmgJLkuI3mlaLoqIDjgIHngrrkuobov47lkIjku5bkurrogIzlo5PmipHnnJ/lr6bmg7Pms5XmmYLvvIzllonpg6jog73ph4/mnIPlmrTph43mt6TnqY3jgII3NDFIeiDlsIjms6jmlrzmuIXnkIbllonovKrmt6TloZ7vvIzllprphpLlhaflnKjogbLpn7PjgIIiLCJsZXNzb24iOiLnt7Tnv5LnnJ/lr6booajpgZToh6rlt7HvvIzlu7rnq4vlgaXlurfnmoTmup3pgJrnlYznt5rvvIzph4vmlL7lo5PmipHnmoTnnJ/lr6blv4PogbLjgIIiLCJyb290Q2F1c2UiOiLlrrPmgJXooajpgZTnnJ/lr6bmg7Pms5XmnIPlvJXnmbzooZ3nqoHmiJbkuI3ooqvllpzmhJvjgILplbfmnJ/lp5Tmm7LmsYLlhajvvIzkvb/llonpg6joiIfpoLjpg6jogozogonlvaLmiJDmhaLmgKfnt4rlvLXvvIzlvbHpn7/lhY3nlqvlipvjgIIiLCJhZmZpcm1hdGlvbiI6IuaIkeWLh+aVouiAjOa6q+aflOWcsOeCuuiHquW3seeZvOiBsuOAguaIkeeahOecn+WvpuiBsumfs+aYr+e+jum6l+S4lOacieWKm+mHj+eahOOAgiJ9LCI4NTIiOnsia2V5d29yZHMiOlsi5oOz5aSq5aSaIiwi5YGc5LiN5LiL5L6GIiwi6Zuc5b+1Iiwi5oCd57eSIiwi5YGP6aCt55ebIiwi6aCt55ebIiwi5a6M576OIiwi6IWm6KKLIiwi55CG5oCnIl0sInRoZW1lIjoiODUyIEh6IOa2iOmZpOaAnee3kumbnOW/temfs+aogiIsInN5bVRhZyI6IuWkqumZveeptOe3iueXm+OAgeiFpuiii+eZvOeGseOAgeWknOmWk+WkseecoOWkmuWkoiIsImVtb1RhZyI6IumBjuW6puaAneiAg+OAgeWkp+iFpumbnOmfs+aJk+i9ieOAgeWujOe+juS4u+e+qeeyvuelnuihsOerrSIsIm1hcHBpbmdEZXNjIjoi55yJ5b+D6Lyq5Luj6KGo55u06Ka66IiH5YWn5Zyo5riF5piO44CC5a6M576O5Li7576p5oiW6Kmm5ZyW55So55CG5pm66Kej5rG655Sf5rS75Lit55qE5q+P5LiA5Lu25LqL77yM5pyD5bCO6Ie06IO96YeP6YGO5bqm6ZuG5Lit5pa86aCt6YOo77yM5L2/5aSn6IWm54Sh5rOV6ZmN5rqr44CCODUySHog6IO95byV5bCO6aCt6YOo6IO96YeP5LiL5rKI77yM5raI6Zmk57Sb5LqC5Y+N6Iq75oCd57eS44CCIiwibGVzc29uIjoi6YeL5pS+55CG5pm66YGO6LyJ77yM5a245pyD5bCH6IO96YeP5bi25Zue6Lqr6auU77yI5o6l5Zyw77yJ77yM5L+h5Lu755Sf5ZG95LmL5rWB44CCIiwicm9vdENhdXNlIjoi5LiN55CG5oCn55qE44CO5b+F6aCI5a6M576O44CB5LiN5a656Kix5Ye66Yyv44CP55qE5qC45b+D5L+h5b+177yM5L+D5L2/5Lqk5oSf56We57aT552h5YmN5oyB57qM5Lqi5aWu77yM5bCH5aSn6IWm55W25L2c5oiw5aC077yM5byV55m85aSx55yg6IiH5YGP6aCt55eb44CCIiwiYWZmaXJtYXRpb24iOiLmiJHlhYHoqLHoh6rlt7HljbjkuIvkuIDlpKnnmoTph43mk5TjgILmiJHnmoTlpKfohablj6/ku6Xlronlv4PkvJHmga/jgILmraTmmYLmraTliLvvvIzmiJHmmK/mlL7prIbnmoTjgIIifX0=";
+        const db = JSON.parse(decodeURIComponent(escape(atob(b64Data))));
+        function analyzeSymptomLocal(text) {
+            let matchedFreq = 528;
+            for (let f in db) {
+                if (f === "528") continue;
+                const keywords = db[f].keywords;
+                const matched = keywords.some(k => text.includes(k));
+                if (matched) {
+                    matchedFreq = parseInt(f);
+                    break;
+                }
+            }
+            return Object.assign({}, db[matchedFreq], { freq: matchedFreq });
+        }
+
+        // --- 本地分析與匹配 ---
+        analyzeBtn.addEventListener('click', () => {
+            const input = symptomInput.value.trim();
+            if (!input) {
+                alert("請先輸入您的身心感受喔！");
+                return;
+            }
+
+            // 關鍵安全防禦：在點擊事件直接觸發的同步代碼中初始化 AudioContext，繞過自動播放限制
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            // 播放無聲緩衝區以完全解鎖 iOS Safari Web Audio 播放限制
+            try {
+                const buffer = audioCtx.createBuffer(1, 1, 22050);
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioCtx.destination);
+                source.start(0);
+            } catch (e) {
+                console.warn("解鎖 Web Audio 失敗:", e);
+            }
+
+            // 1. 開啟載入狀態
+            placeholderTxt.style.display = 'none';
+            reportOutput.style.display = 'none';
+            loadingBox.style.display = 'flex';
+
+            // 模擬分析能量場 1.8 秒
+            setTimeout(() => {
+                loadingBox.style.display = 'none';
+                reportOutput.style.display = 'block';
+                
+                // 本地解密與分析
+                const analysisResult = analyzeSymptomLocal(input);
+                renderReport(analysisResult);
+
+                // 自動加載對應的頻率，設定 1 分鐘定時，並開始播放！
+                currentFreq = parseInt(analysisResult.freq);
+                setFrequencyUI(currentFreq);
+                
+                // 設定為 1 分鐘定時器
+                timerSelect.value = "1";
+                
+                // 啟動音樂
+                stopAudio(); // 清除舊節點
+                startAll();
+            }, 1800);
+        });
+
+        // 渲染報告 HTML 結構
+        function renderReport(data) {
+            reportOutput.innerHTML = `
+                <div class="report-card">
+                    <div class="report-header">個人身心療癒分析報告 (Holistic Report)</div>
+                    <div class="report-quote">
+                        「親愛的，感謝你願意與我分享你的身心狀態。這是一份溫和的指引，旨在協助你聽懂身體的聲音，並透過聲音與影像的共振，重獲內在的和諧與平靜。」
+                    </div>
+
+                    <div class="report-section">
+                        <h3>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"></path><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                            一、 身心狀態評估 (Holistic Assessment)
+                        </h3>
+                        <ul>
+                            <li><strong>身體的聲音</strong>：${data.symTag}</li>
+                            <li><strong>情緒的色彩</strong>：${data.emoTag}</li>
+                            <li><strong>身心對應連結</strong>：${data.mappingDesc}</li>
+                        </ul>
+                    </div>
+
+                    <div class="report-section">
+                        <h3>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path></svg>
+                            二、 核心課題與根源分析 (Root Cause & Lessons)
+                        </h3>
+                        <div class="report-box">
+                            <p><strong>核心課題</strong>：${data.lesson}</p>
+                            <p style="margin-top:8px;"><strong>根源探尋</strong>：${data.rootCause}</p>
+                        </div>
+                    </div>
+
+                    <div class="report-section">
+                        <h3>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                            三、 專屬療癒聲波建議
+                        </h3>
+                        <ul>
+                            <li><strong>建議頻率</strong>：${data.theme}（已自動載入右側合成器並開啟 1 分鐘自動播放）</li>
+                            <li><strong>心靈肯定句</strong>：<span style="color:var(--accent-color); font-weight:600;">「${data.affirmation}」</span></li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 語音輸入 (Web Speech API) ---
+        let recognition = null;
+        let isListening = false;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // 說話停頓後自動停止
+            recognition.interimResults = false; // 只取得最終結果
+            recognition.lang = 'zh-TW'; // 設定語系為繁體中文
+
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add('recording');
+                symptomInput.placeholder = "請開始說話，描述您的身心感受...";
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                // 將語音辨識結果追加到輸入框中
+                if (symptomInput.value) {
+                    symptomInput.value += ' ' + transcript;
+                } else {
+                    symptomInput.value = transcript;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("語音辨識出錯:", event.error);
+                if (event.error === 'not-allowed') {
+                    alert("【權限錯誤】麥克風存取被拒絕。請在瀏覽器網址列左側點擊「鎖頭」圖示，並開啟麥克風權限！");
+                } else if (window.location.protocol === 'file:') {
+                    alert("【安全限制】現代瀏覽器（如 Chrome）基於安全政策，禁止本機網頁檔案 (file://) 使用語音辨識服務。\n\n請改用「部署後的 https 網址」進行測試，或是使用手動輸入文字喔！");
+                } else {
+                    alert("語音辨識失敗 (錯誤碼: " + event.error + ")，請嘗試手動輸入文字。");
+                }
+                stopListening();
+            };
+
+            recognition.onend = () => {
+                stopListening();
+            };
+        } else {
+            // 瀏覽器不支援時隱藏麥克風按鈕
+            micBtn.style.display = 'none';
+        }
+
+        function stopListening() {
+            isListening = false;
+            micBtn.classList.remove('recording');
+            symptomInput.placeholder = "例如：我的狗失蹤了三天，我現在好急、好難過，整晚失眠，胸口感覺很悶...";
+        }
+
+        micBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!recognition) return;
+            
+            try {
+                if (isListening) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            } catch (err) {
+                console.error("語音辨識啟動錯誤:", err);
+                alert("【啟動錯誤】無法啟動語音辨識服務。\n\n原因可能是：\n1. 麥克風已被其他程式佔用。\n2. 您在 LINE/WeChat 等應用程式內建瀏覽器中開啟（請點擊右上角選單改用 Safari 或 Chrome 開啟）。\n3. 網址不是安全加密網址 (https)。\n\n建議您直接手動輸入文字！");
+                stopListening();
+            }
+        });
+    
+        // 初始化付費按鈕事件
+        
+        // [測試專用] 重置按鈕點擊監聽器
+        const devResetBtn = document.getElementById('devResetBtn');
+        if (devResetBtn) {
+            devResetBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                isPremium = false;
+                localStorage.removeItem('auraPremium');
+                document.body.classList.remove('is-premium');
+                // 重建下拉選單鎖頭
+                const options = timerSelect.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value !== '1' && !options[i].text.includes(' 🔒')) {
+                        options[i].text += ' 🔒';
+                    }
+                }
+                alert('🔒 已重置為「免費試用版」（15秒限制）！');
+                if (isPlaying) stopAll();
+            });
+        }
+        
+        document.getElementById('paywallPayBtn').addEventListener('click', unlockPremium);
+        document.getElementById('paywallCloseBtn').addEventListener('click', hidePaywall);
+        
+        // 點擊彈窗外側可以關閉
+        document.getElementById('paywallModal').addEventListener('click', (e) => {
+            if (e.target.id === 'paywallModal') {
+                hidePaywall();
+            }
+        });
+        
+        // 限制開關 (Binaural, Ocean, Breath)
+        [binauralToggle, waveToggle, breathToggle].forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                if (!isPremium) {
+                    e.preventDefault();
+                    showPaywall();
+                }
+            });
+        });
+        
+        // 測試彩蛋：點擊右側大面板標題 5 次重置付費狀態
+        let devClickCount = 0;
+        const rightTitle = document.querySelector('.right-panel h2');
+        if (rightTitle) {
+            rightTitle.style.cursor = 'pointer';
+            rightTitle.addEventListener('click', () => {
+                devClickCount++;
+                if (devClickCount >= 5) {
+                    isPremium = false;
+                    localStorage.removeItem('auraPremium');
+                    document.body.classList.remove('is-premium');
+                    devClickCount = 0;
+                    
+                    // 重建下拉選單鎖頭
+                    const options = timerSelect.options;
+                    for (let i = 0; i < options.length; i++) {
+                        if (options[i].value !== '1' && !options[i].text.includes(' 🔒')) {
+                            options[i].text += ' 🔒';
+                        }
+                    }
+                    
+                    alert('🔒 測試重置：已返回「免費試用版」，音樂限制為 15 秒！');
+                    if (isPlaying) stopAll();
+                }
+            });
+        }
+    
+</script>
+</body>
+</html>
