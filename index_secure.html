@@ -1544,9 +1544,69 @@
             if (isPlaying) { startTimer(); }
         });
 
-        // --- 密碼化本地分析引擎 (Base64 加密防拷貝) ---
-        const b64Data = "eyIzOTYiOnsia2V5d29yZHMiOlsi54uXIiwi6LKTIiwi5a+154mpIiwi5LiN6KaLIiwi5LifIiwi5aSx6LmkIiwi6LKh5YuZIiwi6YeR6YyiIiwi5a6J5YWo5oSfIiwi5LiL6IOMIiwi5LiL6IWwIiwi6Iad6JOLIiwi54Sh5YqbIiwi5oCVIl0sInRoZW1lIjoiMzk2IEh6IOWkp+WcsOaOpeWcsOWuieelnumfs+aogiIsInN5bVRhZyI6IuS4i+iDjOmDqOWDteehrOOAgeiGneiTi+eEoeWKm+OAgeW/g+aFjOawo+S/gyIsImVtb1RhZyI6IuWkseWOu+agueWfuueahOeEpuaFruOAgeaBkOaHvOOAgeWFp+eWmuiIh+iHquiyrCIsIm1hcHBpbmdEZXNjIjoi5rW35bqV6Lyq5piv55Sf5a2Y5a6J5YWo5oSf55qE5qC55Z+644CC5a+154mp5aSx6Lmk5oiW6LKh54mp5pCN5aSx5pyD55u05o6l5YuV5pCW5oiR5YCR55qE5a6J5YWo5qC55Z+677yM5bCO6Ie05b+D56We6aOE5b+944CB5by354OI5oGQ5oWM44CCMzk2SHog6IO95byV5bCO6IO96YeP5rKJ6ZmN44CB6IiH5aSn5Zyw6YeN5paw6YCj57WQ77yM6YeL5pS+44CO5om+5LiN5Yiw54mg44CP5oiW44CO5YGa6Yyv5rG65a6a44CP55Si55Sf55qE6Ieq6LKs44CCIiwibGVzc29uIjoi5Zyo5LiN5Y+v5o6n55qE5YiG6Zui6IiH6K6K5pWF5Lit6YeN5paw6Ieq5oiR5a6a6Yyo77yM6YeL5pS+5LiN55CG5oCn55qE6Ieq6LKs44CCIiwicm9vdENhdXNlIjoi5bCH5LiN5a6J5YWo5oSf6IiH6Ieq5oiR5YO55YC86YGO5bqm57aB5a6a44CC55W26YCj57WQ5Lit5pa35pmC77yM5r2b5oSP6K2Y5ZWf5YuV5LqG5by354OI55qE55Sf5a2Y6Ziy6KGb77yI5oGQ5oe86IiH6Ieq6LKs77yJ77yM5L2/5oKo6Zm35YWl54Sh5rOV6Ieq5ouU55qE54Sm5oWu5b6q55Kw44CCIiwiYWZmaXJtYXRpb24iOiLmiJHph4vmlL7mgZDmh7zoiIfoh6rosqzjgILmiJHlkozmiJHnmoTmiYDmhJvlnKjog73ph4/kuIrmsLjpgaDnm7jpgKPjgILmiJHmmK/lronlhajkuJTouI/lr6bnmoTjgIIifSwiNDE3Ijp7ImtleXdvcmRzIjpbIuaSniIsIui7iiIsIueUn+awoyIsIuaJk+S6uiIsIuaDs+aJk+S6uiIsIuW/g+aDheW+iOW3riIsIuawo+aGpCIsIuWnlOWxiCIsIueqgeeZvCIsIuaEj+WkliIsIuS4jeWFrOW5syIsIui7iuemjSIsIuaAkuawoyJdLCJ0aGVtZSI6IjQxNyBIeiDnmYLnmZLmsLTms6LmuIXnkIbpn7PmqIIiLCJzeW1UYWciOiLog7jlj6PnmbznhrHjgIHpm5nmiYvnt4rnuYPmj6Hmi7PjgIHlkbzlkLjmgKXkv4MiLCJlbW9UYWciOiLmpbXluqbmhqTmgJLjgIHmjKvmipjmhJ/jgIHnhKHlipvmhJ/jgIHnlobnlYzooqvkvrXniq/nmoTmhovlsYgiLCJtYXBwaW5nRGVzYyI6IuacrOaIkei8quixoeW+teaIkeWAkeeahOWAi+S6uumCiueVjOiIh+ihjOWLleWKm+OAgui7iuWtkOiiq+aSnuetieeqgeeZvOS4jeWFrOS6i+S7tu+8jOa9m+aEj+itmOacg+imlueCuuOAjumCiueVjOiiq+eEoeerr+S+teeKr+OAj++8jOmAsuiAjOacrOiDveWcsOWVn+WLleOAjuaIsOaIlumAg+OAj+eahOaUu+aTiuihneWLle+8iOaDs+aJk+S6uu+8ieOAgjQxN0h6IOiDvea6q+WSjOeWj+WwjumAmeiCoea7vueHmeeahOeBq+awo++8jOa4heeQhuWJteWCt+OAgiIsImxlc3NvbiI6IuWtuOe/kuWcqOWkseaOp+OAgeS4jeWFrOeahOeqgeeZvOS6i+S7tuS4remHjeaWsOiHquaIkeWumumMqO+8jOmHi+aUvuWwjee1leWwjeaOjOaOp+eahOWft+iRl+OAgiIsInJvb3RDYXVzZSI6IuaGpOaAkuaYr+eCuuS6huaOqeiTi+OAjueEoeazleaOjOaOp+WkluWcqOiuiuaVuOOAj+eahOiiq+WLleiIh+eEoeWKm+aEn+OAguWmguaenOW8t+ihjOWjk+aKkeaIluS7peaatOWKm+Wuo+a0qemAmeiCoeiDvemHj++8jOacgOe1guWPquacg+S6jOasoeWCt+Wus+aCqOeahOi6q+W/g+OAgiIsImFmZmlybWF0aW9uIjoi5oiR5YWB6Kix6Ieq5bex55Sf5rCj77yM5L2G5oiR5ouS57WV55So5Yil5Lq655qE6Yyv6Kqk5oey572w5oiR6Ieq5bex55qE6Lqr6auU44CC5oiR5piv5a6J5YWo55qE77yM5oiR5Y+v5Lul5oWi5oWi5bmz5oGv44CCIn0sIjUyOCI6eyJrZXl3b3JkcyI6W10sInRoZW1lIjoiNTI4IEh6IOWlh+i5n+e0sOiDnuS/ruW+qemfs+aogiIsInN5bVRhZyI6IuaXpeW4uOeyvuelnueWsuWLnuOAgea2iOWMluiIh+iDvemHj+mYu+a7ryIsImVtb1RhZyI6IueEpuaFruOAgeW/g+elnuS4jeWvp+OAgemBjuW6pue3iue5gyIsIm1hcHBpbmdEZXNjIjoi6IOD6YOo6IiH5aSq6Zm956We57aT5Y+i5Luj6KGo5oiR5YCR5ZC45pS25aSW5Zyo5LqL5Lu255qE6IO95Yqb44CC55W25aSW55WM6LOH6KiK5oiW5aOT5Yqb6YGO6LyJ5pmC77yM6IOD6YOo5pyD57eK57iu44CCNTI4SHog55qE6IO96YeP5oyv6aC75bCI5rOo5pa86IiS57ep5aSq6Zm956We57aT5Y+i55qE5aOT6L+r77yM6Kq/56+A5Ymv5Lqk5oSf56We57aT77yM5Y2U5Yqp6IOD6YOo5bmz5ruR6IKM6YeN5paw5pS+6ayG44CCIiwibGVzc29uIjoi5a245pyD5pS+5omL77yM6Iej5pyN5pa855W25LiL77yM5L+h5Lu75LqL5oOF5pyD5pyJ5pyA5aW955qE5a6J5o6S44CCIiwicm9vdENhdXNlIjoi6Kmm5ZyW5o6M5o6n55Sf5rS75Lit55qE5q+P5LiA5Lu25bCP5LqL77yM5bCN5pyq55+l55Si55Sf5oqX5ouS6IiH54Sm5oWu44CC6YCZ6IKh57eK57mD5oSf55u05o6l5aOT6L+r5LqG5oKo55qE5raI5YyW57O757Wx77yM5bCO6Ie06Lqr6auU55m85Ye644CO6KuL5YGc5q2i6YGO5bqm6LKg6I2344CP55qE6KiK6Jmf44CCIiwiYWZmaXJtYXRpb24iOiLmiJHlhYHoqLHoh6rlt7HmlL7kuIvkuI3lsazmlrzmiJHnmoTmjqfliLbvvIzmiJHmmK/lronlhajnmoTvvIzmiJHooqvlroflrpnmuqvmn5TlnLDmlK/mjIHokZfjgIIifSwiNjM5Ijp7ImtleXdvcmRzIjpbIumbo+mBjiIsIuWCt+W/gyIsIuW/g+eXmyIsIuiDuOWPoyIsIuiDuOaCtiIsIuWTrSIsIuaEmyIsIuWIhuaJiyIsIuWQteaetiIsIumXnOS/giIsIuekvuS6pCJdLCJ0aGVtZSI6IjYzOSBIeiDlv4PovKrlkozoq6fmlZ7plovpn7PmqIIiLCJzeW1UYWciOiLog7jlj6Pmsonph43nt4rnuYPjgIHnqpLmga/mhJ/jgIHnnLznnLbnmbzphbgiLCJlbW9UYWciOiLmgrLlgrfjgIHlpLHokL3mhJ/jgIHlraTllq7jgIHnpL7kuqTmiJbmg4XmhJ/nhKbmha4iLCJtYXBwaW5nRGVzYyI6IuW/g+i8quS7o+ihqOaEm+iIh+S6uumam+mXnOS/gueahOmAo+e1kOOAgumBremBh+WQteaetuOAgeWIhuaJi+aIluaDheaEn+mHjeWJteaZgu+8jOiDuOWPo+acg+WDj+WhnuS6humHjeeJqeiIrOe3iue5g+OAgjYzOUh6IOiDveS7pea6q+aflOeahOWkp+iqv+WSjOW8pu+8jOi7n+WMlumYsuempuapn+WItu+8jOaVnumWi+e3iumWieeahOW/g+aJie+8jOW4tuS+huWvrOaBleiIh+iHquaEm+eahOiDvemHj+OAgiIsImxlc3NvbiI6IuWfueiCsuWwjeiHquW3seiIh+S7luS6uueahOaFiOaCsuW/g++8jOeQhuino+iQrOeJqemAo+e1kO+8jOe3tOe/kuWBpeW6t+iHquaEm+OAgiIsInJvb3RDYXVzZSI6IuWus+aAleiiq+mBuuajhOaIlue/kuaFo+WcqOS6uumam+S4reWjk+aKkeiHquaIkemcgOaxgu+8iOiojuWlveWei+S6uuagvO+8ieOAgueVtuaDheaEn+mAo+e1kOWPl+aMq+aZgu+8jOi6q+mrlOWwh+mAmeiCoeaCsuWCt+WMlueCuueUn+eQhuS4iueahOiDuOaCtuiIh+eqkuaBr+aEn+OAgiIsImFmZmlybWF0aW9uIjoi5oiR5pWe6ZaL5b+D5omJ77yM57Wm5LqI5Lim5o6l5Y+X5oSb44CC5oiR54Sh5qKd5Lu25Zyw5oSb5Lim5o6l57SN5Y6f5pys55qE6Ieq5bex44CCIn0sIjc0MSI6eyJrZXl3b3JkcyI6WyLllonlmqgiLCLoqqrkuI3lh7oiLCLooajpgZQiLCLogbLpn7MiLCLoqqroqbEiLCLmhJ/lhpIiLCLlkrPll70iLCLlm7rln7ciLCLnmbzogbIiXSwidGhlbWUiOiI3NDEgSHog5ZaJ6Lyq5riF5q+S6KGo6YGU6Z+z5qiCIiwic3ltVGFnIjoi5ZaJ5Zqo57eK57iu5Y2h6aCT44CB5ZK95ZaJ6IWr55eb44CB5oWi5oCn5ZKz5Ze9IiwiZW1vVGFnIjoi6KGo6YGU5Y+X6Zi744CB5pWi5oCS5LiN5pWi6KiA44CB5Zu65Z+36Ziy6KGbIiwibWFwcGluZ0Rlc2MiOiLllonlmqjku6PooajmiJHlgJHnmoTnnJ/lr6bnmbzogbLoiIflibXpgKDlipvjgILnlbbmiJHlgJHmlaLmgJLkuI3mlaLoqIDjgIHngrrkuobov47lkIjku5bkurrogIzlo5PmipHnnJ/lr6bmg7Pms5XmmYLvvIzllonpg6jog73ph4/mnIPlmrTph43mt6TnqY3jgII3NDFIeiDlsIjms6jmlrzmuIXnkIbllonovKrmt6TloZ7vvIzllprphpLlhaflnKjogbLpn7PjgIIiLCJsZXNzb24iOiLnt7Tnv5LnnJ/lr6booajpgZToh6rlt7HvvIzlu7rnq4vlgaXlurfnmoTmup3pgJrnlYznt5rvvIzph4vmlL7lo5PmipHnmoTnnJ/lr6blv4PogbLjgIIiLCJyb290Q2F1c2UiOiLlrrPmgJXooajpgZTnnJ/lr6bmg7Pms5XmnIPlvJXnmbzooZ3nqoHmiJbkuI3ooqvllpzmhJvjgILplbfmnJ/lp5Tmm7LmsYLlhajvvIzkvb/llonpg6joiIfpoLjpg6jogozogonlvaLmiJDmhaLmgKfnt4rlvLXvvIzlvbHpn7/lhY3nlqvlipvjgIIiLCJhZmZpcm1hdGlvbiI6IuaIkeWLh+aVouiAjOa6q+aflOWcsOeCuuiHquW3seeZvOiBsuOAguaIkeeahOecn+WvpuiBsumfs+aYr+e+jum6l+S4lOacieWKm+mHj+eahOOAgiJ9LCI4NTIiOnsia2V5d29yZHMiOlsi5oOz5aSq5aSaIiwi5YGc5LiN5LiL5L6GIiwi6Zuc5b+1Iiwi5oCd57eSIiwi5YGP6aCt55ebIiwi6aCt55ebIiwi5a6M576OIiwi6IWm6KKLIiwi55CG5oCnIl0sInRoZW1lIjoiODUyIEh6IOa2iOmZpOaAnee3kumbnOW/temfs+aogiIsInN5bVRhZyI6IuWkqumZveeptOe3iueXm+OAgeiFpuiii+eZvOeGseOAgeWknOmWk+WkseecoOWkmuWkoiIsImVtb1RhZyI6IumBjuW6puaAneiAg+OAgeWkp+iFpumbnOmfs+aJk+i9ieOAgeWujOe+juS4u+e+qeeyvuelnuihsOerrSIsIm1hcHBpbmdEZXNjIjoi55yJ5b+D6Lyq5Luj6KGo55u06Ka66IiH5YWn5Zyo5riF5piO44CC5a6M576O5Li7576p5oiW6Kmm5ZyW55So55CG5pm66Kej5rG655Sf5rS75Lit55qE5q+P5LiA5Lu25LqL77yM5pyD5bCO6Ie06IO96YeP6YGO5bqm6ZuG5Lit5pa86aCt6YOo77yM5L2/5aSn6IWm54Sh5rOV6ZmN5rqr44CCODUySHog6IO95byV5bCO6aCt6YOo6IO96YeP5LiL5rKI77yM5raI6Zmk57Sb5LqC5Y+N6Iq75oCd57eS44CCIiwibGVzc29uIjoi6YeL5pS+55CG5pm66YGO6LyJ77yM5a245pyD5bCH6IO96YeP5bi25Zue6Lqr6auU77yI5o6l5Zyw77yJ77yM5L+h5Lu755Sf5ZG95LmL5rWB44CCIiwicm9vdENhdXNlIjoi5LiN55CG5oCn55qE44CO5b+F6aCI5a6M576O44CB5LiN5a656Kix5Ye66Yyv44CP55qE5qC45b+D5L+h5b+177yM5L+D5L2/5Lqk5oSf56We57aT552h5YmN5oyB57qM5Lqi5aWu77yM5bCH5aSn6IWm55W25L2c5oiw5aC077yM5byV55m85aSx55yg6IiH5YGP6aCt55eb44CCIiwiYWZmaXJtYXRpb24iOiLmiJHlhYHoqLHoh6rlt7HljbjkuIvkuIDlpKnnmoTph43mk5TjgILmiJHnmoTlpKfohablj6/ku6Xlronlv4PkvJHmga/jgILmraTmmYLmraTliLvvvIzmiJHmmK/mlL7prIbnmoTjgIIifX0=";
-        const db = JSON.parse(decodeURIComponent(escape(atob(b64Data))));
+        // --- 本地身心分析資料庫 ---
+        const db = {
+            396: {
+                keywords: ["狗","貓","寵物","不見","丟","失蹤","財務","金錢","安全感","下背","下腰","膝蓋","無力","怕"],
+                theme: "396 Hz 大地接地安神音樂",
+                symTag: "下背部僵硬、膝蓋無力、心慌氣促",
+                emoTag: "失去根基的焦慮、恐懼、內疚與自責",
+                mappingDesc: "海底輪是生存安全感的根基。寵物失蹤或財物損失會直接動搖我們的安全根基，導致心神飄忽、強烈恐慌。396Hz 能引導能量沉降、與大地重新連結，釋放『找不到牠』或『做錯決定』產生的自責。",
+                lesson: "在不可控的分離與變故中重新自我定錨，釋放不理性的自責。",
+                rootCause: "將不安全感與自我價值過度綁定。當連結中斷時，潛意識啟動了強烈的生存防衛（恐懼與自責），使您陷入無法自拔的焦慮循環。",
+                affirmation: "我釋放恐懼與自責。我和我的所愛在能量上永遠相連。我是安全且踏實的。"
+            },
+            417: {
+                keywords: ["撞","車","生氣","打人","想打人","心情很差","氣憤","委屈","突發","意外","不公平","車禍","怒氣"],
+                theme: "417 Hz 療癒水波清理音樂",
+                symTag: "胸口發熱、雙手緊繃握拳、呼吸急促",
+                emoTag: "極度憤怒、挫折感、無力感、疆界被侵犯的憋屈",
+                mappingDesc: "本我輪象徵我們的個人邊界與行動力。車子被撞等突發不公事件，潛意識會視為『邊界被無端侵犯』，進而本能地啟動『戰或逃』的攻擊衝動（想打人）。417Hz 能溫和疏導這股滾燙的火氣，清理創傷。",
+                lesson: "學習在失控、不公的突發事件中重新自我定錨，釋放對絕對掌控的執著。",
+                rootCause: "憤怒是為了掩蓋『無法掌控外在變數』的被動與無力感。如果強行壓抑或以暴力宣洩這股能量，最終只會二次傷害您的身心。",
+                affirmation: "我允許自己生氣，但我拒絕用別人的錯誤懲罰我自己的身體。我是安全的，我可以慢慢平息。"
+            },
+            528: {
+                keywords: [],
+                theme: "528 Hz 奇蹟細胞修復音樂",
+                symTag: "日常精神疲勞、消化與能量阻滯",
+                emoTag: "焦慮、心神不寧、過度緊繃",
+                mappingDesc: "胃部與太陽神經叢代表我們吸收外在事件的能力。當外界資訊或壓力過載時，胃部會緊縮。528Hz 的能量振頻專注於舒緩太陽神經叢的壓迫，調節副交感神經，協助胃部平滑肌重新放鬆。",
+                lesson: "學會放手，臣服於當下，信任事情會有最好的安排。",
+                rootCause: "試圖掌控生活中的每一件小事，對未知產生抗拒與焦慮。這股緊繃感直接壓迫了您的消化系統，導致身體發出『請停止過度負荷』的訊號。",
+                affirmation: "我允許自己放下不屬於我的控制，我是安全的，我被宇宙溫柔地支持著。"
+            },
+            639: {
+                keywords: ["難過","傷心","心痛","胸口","胸悶","哭","愛","分手","吵架","關係","社交"],
+                theme: "639 Hz 心輪和諧敞開音樂",
+                symTag: "胸口沉重緊繃、窒息感、眼眶發酸",
+                emoTag: "悲傷、失落感、孤單、社交或情感焦慮",
+                mappingDesc: "心輪代表愛與人際關係的連結。遭遇吵架、分手或情感重創時，胸口會像塞了重物般緊繃。639Hz 能以溫柔的大調和弦，軟化防禦機制，敞開緊閉的心扉，帶來寬恕與自愛的能量。",
+                lesson: "培育對自己與他人的慈悲心，理解萬物連結，練習健康自愛。",
+                rootCause: "害怕被遺棄或習慣在人際中壓抑自我需求（討好型人格）。當情感連結受挫時，身體將這股悲傷化為生理上的胸悶與窒息感。",
+                affirmation: "我敞開心扉，給予並接受愛。我無條件地愛並接納原本的自己。"
+            },
+            741: {
+                keywords: ["喉嚨","說不出","表達","聲音","說話","感冒","咳嗽","固執","發聲"],
+                theme: "741 Hz 喉輪清毒表達音樂",
+                symTag: "喉嚨緊縮卡頓、咽喉腫痛、慢性咳嗽",
+                emoTag: "表達受阻、敢怒不敢言、固執防衛",
+                mappingDesc: "喉嚨代表我們的真實發聲與創造力。當我們敢怒不敢言、為了迎合他人而壓抑真實想法時，喉部能量會嚴重淤積。741Hz 專注於清理喉輪淤塞，喚醒內在聲音。",
+                lesson: "練習真實表達自己，建立健康的溝通界線，釋放壓抑的真實心聲。",
+                rootCause: "害怕表達真實想法會引發衝突或不被喜愛。長期委曲求全，使喉部與頸部肌肉形成慢性緊張，影響免疫力。",
+                affirmation: "我勇敢而溫柔地為自己發聲。我的真實聲音是美麗且有力量的。"
+            },
+            852: {
+                keywords: ["想太多","停不下來","雜念","思緒","偏頭痛","頭痛","完美","腦袋","理性"],
+                theme: "852 Hz 消除思緒雜念音樂",
+                symTag: "太陽穴緊痛、腦袋發熱、夜間失眠多夢",
+                emoTag: "過度思考、大腦雜音打轉、完美主義精神衰竭",
+                mappingDesc: "眉心輪代表直覺與內在清明。完美主義或試圖用理智解決生活中的每一件事，會導致能量過度集中於頭部，使大腦無法降溫。852Hz 能引導頭部能量下沈，消除紛亂反芻思緒。",
+                lesson: "釋放理智過載，學會將能量帶回身體（接地），信任生命之流。",
+                rootCause: "不理性的『必須完美、不容許出錯』的核心信念，促使交感神經睡前持續亢奮，將大腦當作戰場，引發失眠與偏頭痛。",
+                affirmation: "我允許自己卸下一天的重擔。我的大腦可以安心休息。此時此刻，我是放鬆的。"
+            }
+        };
 
         function analyzeSymptomLocal(text) {
             let matchedFreq = 528;
