@@ -2029,13 +2029,14 @@
             });
         }
 
-        // 註冊 PWA Service Worker (離線快取)
+        // 強制解綁舊版 Service Worker 快取，確保 100% 讀取最新線上程式碼
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('../sw.js')
-                    .then(reg => console.log('PWA Service Worker 註冊成功:', reg.scope))
-                    .catch(err => console.warn('PWA Service Worker 註冊失敗:', err));
-            });
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let reg of registrations) {
+                    console.log('Unregistering stale SW:', reg);
+                    reg.unregister();
+                }
+            }).catch(e => console.warn(e));
         }
 
         // 10 天免費試用與 VIP 邀請碼解鎖邏輯
