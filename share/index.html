@@ -1750,15 +1750,22 @@
             return Object.assign({}, data, { freq: matchedFreq });
         }
 
+        // 全局安全 Storage (相容 iOS 私密瀏覽與 LINE 內建視窗)
+        const safeStorage = {
+            getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+            setItem: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+            removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+        };
+
         // --- 本地分析與匹配 ---
-        analyzeBtn.addEventListener('click', () => {
-            const input = symptomInput.value.trim();
+        function runAnalysis() {
+            let input = symptomInput.value.trim();
             if (!input) {
-                alert("請先輸入您的身心感受喔！");
-                return;
+                input = "最近覺得有些緊繃與焦慮，希望能放鬆身心平靜心情";
+                symptomInput.value = input;
             }
 
-            // 關鍵安全防禦：在點擊事件直接觸發的同步代碼中初始化 AudioContext，繞過自動播放限制
+            // 關鍵安全防禦：在點擊事件直接觸發的同步代碼中初始化 AudioContext
             try {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1766,7 +1773,6 @@
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
-                // 播放無聲緩衝區以完全解鎖 iOS Safari Web Audio 播放限制
                 const buffer = audioCtx.createBuffer(1, 1, 22050);
                 const source = audioCtx.createBufferSource();
                 source.buffer = buffer;
@@ -1776,42 +1782,42 @@
                 console.warn("解鎖 Web Audio 警告:", e);
             }
 
-            // 1. 開啟載入狀態
+            // 1. 切換顯示
             placeholderTxt.style.display = 'none';
-            reportOutput.style.display = 'none';
-            loadingBox.style.display = 'flex';
+            loadingBox.style.display = 'none';
+            
+            // 2. 本地分析與即時渲染報告 (0 秒延遲，絕不卡死)
+            try {
+                const analysisResult = analyzeSymptomLocal(input);
+                renderReport(analysisResult);
+                reportOutput.style.display = 'block';
 
-            // 快速呈現分析結果 (300ms 最佳流暢度)
-            setTimeout(() => {
-                loadingBox.style.display = 'none';
-                
+                currentFreq = parseInt(analysisResult.freq) || 528;
+                setFrequencyUI(currentFreq);
+                timerSelect.value = "1";
+
+                // 手機自動將畫面捲動至報告區域
+                setTimeout(() => {
+                    const el = document.getElementById('reportDisplay') || reportOutput;
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
+
+                // 嘗試啟動音律播放
                 try {
-                    // 本地分析與渲染報告
-                    const analysisResult = analyzeSymptomLocal(input);
-                    renderReport(analysisResult);
-                    reportOutput.style.display = 'block';
-
-                    // 自動加載對應的頻率與 UI
-                    currentFreq = parseInt(analysisResult.freq) || 528;
-                    setFrequencyUI(currentFreq);
-                    timerSelect.value = "1";
-
-                    // 手機上平滑滾動到報告位置
-                    reportOutput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-                    // 嘗試啟動音律播放
-                    try {
-                        stopAudio();
-                        startAll();
-                    } catch (audioErr) {
-                        console.warn("自動播放音效受限:", audioErr);
-                    }
-                } catch (err) {
-                    console.error("分析過程異常:", err);
-                    reportOutput.style.display = 'block';
-                    alert("分析完成！已為您套用對應身心聲波。");
+                    stopAudio();
+                    startAll();
+                } catch (audioErr) {
+                    console.warn("自動播放音效受限:", audioErr);
                 }
-            }, 300);
+            } catch (err) {
+                console.error("分析過程異常:", err);
+                reportOutput.style.display = 'block';
+            }
+        }
+
+        analyzeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            runAnalysis();
         });
 
         // 渲染報告 HTML 結構
@@ -2008,6 +2014,8 @@
                     if (isPlaying) stopAll();
                 }
             });
+        }
+
         // 註冊 PWA Service Worker (離線快取)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -2023,12 +2031,12 @@
             const VALID_CODES = ['XIYANYU888', 'AURA2026', 'HEALING888', 'AURA888', 'JUNG888'];
             
             const now = Date.now();
-            let trialStart = localStorage.getItem('auraharmonic_trial_start');
-            let isVIP = localStorage.getItem('auraharmonic_is_vip') === 'true';
+            let trialStart = safeStorage.getItem('auraharmonic_trial_start');
+            let isVIP = safeStorage.getItem('auraharmonic_is_vip') === 'true';
 
             if (!trialStart) {
                 trialStart = now;
-                localStorage.setItem('auraharmonic_trial_start', trialStart);
+                safeStorage.setItem('auraharmonic_trial_start', trialStart);
             } else {
                 trialStart = parseInt(trialStart, 10);
             }
@@ -2073,7 +2081,7 @@
                 unlockBtn.addEventListener('click', () => {
                     const val = codeInput.value.trim().toUpperCase();
                     if (VALID_CODES.includes(val)) {
-                        localStorage.setItem('auraharmonic_is_vip', 'true');
+                        safeStorage.setItem('auraharmonic_is_vip', 'true');
                         if (codeMsg) {
                             codeMsg.style.color = '#859473';
                             codeMsg.innerText = '🎉 驗證成功！已升級為 VIP 尊榮終身版。';
