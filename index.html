@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraHarmonic ── 互動式身心療癒與聲學合成儀</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#3e3532">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="./icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-                                        :root {
+        :root {
             --bg-color: #3e3532;
             --card-bg: rgba(255, 250, 245, 0.92);
             --card-border: rgba(197, 179, 157, 0.25);
@@ -23,6 +28,104 @@
             --color-852: linear-gradient(135deg, #bbaec8, #91829e); /* 眉心輪 暖調紫 */
             
             --active-glow: var(--color-417);
+        }
+
+        /* 10 天免費試用標籤與彈窗樣式 */
+        .trial-badge {
+            position: fixed;
+            top: 15px;
+            right: 20px;
+            background: rgba(255, 250, 245, 0.95);
+            border: 1px solid rgba(202, 122, 101, 0.4);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            color: #362e2b;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(54, 46, 43, 0.15);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .trial-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 46, 43, 0.2);
+        }
+
+        .trial-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(42, 40, 47, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .trial-modal-card {
+            width: 90%;
+            max-width: 440px;
+            background: rgba(255, 250, 245, 0.98);
+            border: 1px solid rgba(197, 179, 157, 0.3);
+            border-radius: 28px;
+            padding: 35px 30px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(54, 46, 43, 0.3);
+            box-sizing: border-box;
+        }
+
+        .trial-modal-card h3 {
+            font-size: 1.35rem;
+            color: #362e2b;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .trial-modal-desc {
+            font-size: 0.9rem;
+            color: #7a6e67;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .vip-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .vip-input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 14px;
+            border: 1px solid rgba(197, 179, 157, 0.4);
+            background: #f2e8dc;
+            font-size: 0.9rem;
+            color: #362e2b;
+            outline: none;
+        }
+
+        .vip-unlock-btn {
+            padding: 12px 20px;
+            background: var(--active-glow);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .vip-unlock-btn:hover {
+            opacity: 0.9;
         }
 
         * {
@@ -832,6 +935,29 @@
     </svg>
 
 
+    <!-- 10天免費試用標籤 -->
+    <div class="trial-badge" id="trialBadge">🎁 10天免費試用</div>
+
+    <!-- 試用期滿 / VIP 解鎖彈窗 -->
+    <div class="trial-modal-overlay" id="trialModal" style="display:none;">
+        <div class="trial-modal-card">
+            <h3>🌸 10天免費體驗已屆滿</h3>
+            <p class="trial-modal-desc">
+                感謝您參與 <strong>AuraHarmonic 身心療癒儀</strong> 體驗！<br>
+                您的 10 天免費試用期已結束。<br>
+                請輸入 VIP 邀請碼解鎖全功能，或聯繫創辦人開通。
+            </p>
+            <div class="vip-input-group">
+                <input type="text" id="vipCodeInput" placeholder="請輸入 VIP 邀請碼 (如: XIYANYU888)">
+                <button id="vipUnlockBtn" class="vip-unlock-btn">解鎖開通</button>
+            </div>
+            <div id="vipCodeMsg" style="font-size:0.85rem; margin-top:8px; font-weight:600;"></div>
+            <div style="font-size:0.8rem; color:#7a6e67; margin-top:15px;">
+                💡 試用邀請碼：可輸入 <strong>XIYANYU888</strong> 或 <strong>AURA2026</strong> 開通終身版
+            </div>
+        </div>
+    </div>
+
     <div class="background-glow" id="bgGlow"></div>
 
     <div class="app-container">
@@ -902,7 +1028,7 @@
             <!-- 說明卡 -->
             <div class="freq-info-card">
                 <div class="freq-info-title" id="infoTitle">417 Hz ─ 療癒水波音樂</div>
-                <div class="freq-info-desc" id="infoDesc">融合海浪潮汐與溫暖和弦，搭載 417Hz 的療癒音軌。能溫和地清理焦躁不安與突發事件帶來的負面創傷，幫助心情重歸平穩。</div>
+                <div class="freq-info-desc" id="infoDesc">融合海浪潮汐與溫慢和弦，搭載 417Hz 的療癒音軌。能溫和地清理焦躁不安與突發事件帶來的負面創傷，幫助心情重歸平穩。</div>
             </div>
 
             <!-- 音量與定時 -->
@@ -927,11 +1053,11 @@
                         <input type="checkbox" id="breathToggle" checked>
                         <span class="slider"></span>
                     </label>
-                </div>                <div class="control-row">
+                </div>
+                <div class="control-row">
                     <span class="control-label">音量大小</span>
                     <input type="range" class="range-slider" id="volSlider" min="0" max="1.0" step="0.01" value="0.50">
                 </div>
-
             </div>
 
             <div class="main-controls">
@@ -1544,75 +1670,154 @@
             if (isPlaying) { startTimer(); }
         });
 
-        // --- 後端 API 分析與匹配 ---
-        analyzeBtn.addEventListener('click', () => {
-            const input = symptomInput.value.trim();
+        // --- 本地身心分析資料庫 ---
+        const db = {
+            396: {
+                keywords: ["狗","貓","寵物","不見","丟","失蹤","財務","金錢","安全感","下背","下腰","膝蓋","無力","怕"],
+                theme: "396 Hz 大地接地安神音樂",
+                symTag: "下背部僵硬、膝蓋無力、心慌氣促",
+                emoTag: "失去根基的焦慮、恐懼、內疚與自責",
+                mappingDesc: "海底輪是生存安全感的根基。寵物失蹤或財物損失會直接動搖我們的安全根基，導致心神飄忽、強烈恐慌。396Hz 能引導能量沉降、與大地重新連結，釋放『找不到牠』或『做錯決定』產生的自責。",
+                lesson: "在不可控的分離與變故中重新自我定錨，釋放不理性的自責。",
+                rootCause: "將不安全感與自我價值過度綁定。當連結中斷時，潛意識啟動了強烈的生存防衛（恐懼與自責），使您陷入無法自拔的焦慮循環。",
+                affirmation: "我釋放恐懼與自責。我和我的所愛在能量上永遠相連。我是安全且踏實的。"
+            },
+            417: {
+                keywords: ["撞","車","生氣","打人","想打人","心情很差","氣憤","委屈","突發","意外","不公平","車禍","怒氣"],
+                theme: "417 Hz 療癒水波清理音樂",
+                symTag: "胸口發熱、雙手緊繃握拳、呼吸急促",
+                emoTag: "極度憤怒、挫折感、無力感、疆界被侵犯的憋屈",
+                mappingDesc: "本我輪象徵我們的個人邊界與行動力。車子被撞等突發不公事件，潛意識會視為『邊界被無端侵犯』，進而本能地啟動『戰或逃』的攻擊衝動（想打人）。417Hz 能溫和疏導這股滾燙的火氣，清理創傷。",
+                lesson: "學習在失控、不公的突發事件中重新自我定錨，釋放對絕對掌控的執著。",
+                rootCause: "憤怒是為了掩蓋『無法掌控外在變數』的被動與無力感。如果強行壓抑或以暴力宣洩這股能量，最終只會二次傷害您的身心。",
+                affirmation: "我允許自己生氣，但我拒絕用別人的錯誤懲罰我自己的身體。我是安全的，我可以慢慢平息。"
+            },
+            528: {
+                keywords: [],
+                theme: "528 Hz 奇蹟細胞修復音樂",
+                symTag: "日常精神疲勞、消化與能量阻滯",
+                emoTag: "焦慮、心神不寧、過度緊繃",
+                mappingDesc: "胃部與太陽神經叢代表我們吸收外在事件的能力。當外界資訊或壓力過載時，胃部會緊縮。528Hz 的能量振頻專注於舒緩太陽神經叢的壓迫，調節副交感神經，協助胃部平滑肌重新放鬆。",
+                lesson: "學會放手，臣服於當下，信任事情會有最好的安排。",
+                rootCause: "試圖掌控生活中的每一件小事，對未知產生抗拒與焦慮。這股緊繃感直接壓迫了您的消化系統，導致身體發出『請停止過度負荷』的訊號。",
+                affirmation: "我允許自己放下不屬於我的控制，我是安全的，我被宇宙溫柔地支持著。"
+            },
+            639: {
+                keywords: ["難過","傷心","心痛","胸口","胸悶","哭","愛","分手","吵架","關係","社交"],
+                theme: "639 Hz 心輪和諧敞開音樂",
+                symTag: "胸口沉重緊繃、窒息感、眼眶發酸",
+                emoTag: "悲傷、失落感、孤單、社交或情感焦慮",
+                mappingDesc: "心輪代表愛與人際關係的連結。遭遇吵架、分手或情感重創時，胸口會像塞了重物般緊繃。639Hz 能以溫柔的大調和弦，軟化防禦機制，敞開緊閉的心扉，帶來寬恕與自愛的能量。",
+                lesson: "培育對自己與他人的慈悲心，理解萬物連結，練習健康自愛。",
+                rootCause: "害怕被遺棄或習慣在人際中壓抑自我需求（討好型人格）。當情感連結受挫時，身體將這股悲傷化為生理上的胸悶與窒息感。",
+                affirmation: "我敞開心扉，給予並接受愛。我無條件地愛並接納原本的自己。"
+            },
+            741: {
+                keywords: ["喉嚨","說不出","表達","聲音","說話","感冒","咳嗽","固執","發聲"],
+                theme: "741 Hz 喉輪清毒表達音樂",
+                symTag: "喉嚨緊縮卡頓、咽喉腫痛、慢性咳嗽",
+                emoTag: "表達受阻、敢怒不敢言、固執防衛",
+                mappingDesc: "喉嚨代表我們的真實發聲與創造力。當我們敢怒不敢言、為了迎合他人而壓抑真實想法時，喉部能量會嚴重淤積。741Hz 專注於清理喉輪淤塞，喚醒內在聲音。",
+                lesson: "練習真實表達自己，建立健康的溝通界線，釋放壓抑的真實心聲。",
+                rootCause: "害怕表達真實想法會引發衝突或不被喜愛。長期委曲求全，使喉部與頸部肌肉形成慢性緊張，影響免疫力。",
+                affirmation: "我勇敢而溫柔地為自己發聲。我的真實聲音是美麗且有力量的。"
+            },
+            852: {
+                keywords: ["想太多","停不下來","雜念","思緒","偏頭痛","頭痛","完美","腦袋","理性"],
+                theme: "852 Hz 消除思緒雜念音樂",
+                symTag: "太陽穴緊痛、腦袋發熱、夜間失眠多夢",
+                emoTag: "過度思考、大腦雜音打轉、完美主義精神衰竭",
+                mappingDesc: "眉心輪代表直覺與內在清明。完美主義或試圖用理智解決生活中的每一件事，會導致能量過度集中於頭部，使大腦無法降溫。852Hz 能引導頭部能量下沈，消除紛亂反芻思緒。",
+                lesson: "釋放理智過載，學會將能量帶回身體（接地），信任生命之流。",
+                rootCause: "不理性的『必須完美、不容許出錯』的核心信念，促使交感神經睡前持續亢奮，將大腦當作戰場，引發失眠與偏頭痛。",
+                affirmation: "我允許自己卸下一天的重擔。我的大腦可以安心休息。此時此刻，我是放鬆的。"
+            }
+        };
+
+        function analyzeSymptomLocal(text) {
+            let matchedFreq = 528;
+            if (text && typeof text === 'string') {
+                for (let f in db) {
+                    if (f === "528") continue;
+                    const keywords = db[f] ? db[f].keywords : [];
+                    if (keywords && keywords.some(k => text.includes(k))) {
+                        matchedFreq = parseInt(f);
+                        break;
+                    }
+                }
+            }
+            const data = db[matchedFreq] || db[528];
+            return Object.assign({}, data, { freq: matchedFreq });
+        }
+
+        // 全局安全 Storage (相容 iOS 私密瀏覽與 LINE 內建視窗)
+        const safeStorage = {
+            getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+            setItem: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+            removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+        };
+
+        // --- 本地分析與匹配 ---
+        function runAnalysis() {
+            let input = symptomInput.value.trim();
             if (!input) {
-                alert("請先輸入您的身心感受喔！");
-                return;
+                input = "最近覺得有些緊繃與焦慮，希望能放鬆身心平靜心情";
+                symptomInput.value = input;
             }
 
-            // 關鍵安全防禦：在點擊事件直接觸發的同步代碼中初始化 AudioContext，繞過自動播放限制
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            // 播放無聲緩衝區以完全解鎖 iOS Safari Web Audio 播放限制
+            // 關鍵安全防禦：在點擊事件直接觸發的同步代碼中初始化 AudioContext
             try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 const buffer = audioCtx.createBuffer(1, 1, 22050);
                 const source = audioCtx.createBufferSource();
                 source.buffer = buffer;
                 source.connect(audioCtx.destination);
                 source.start(0);
             } catch (e) {
-                console.warn("解鎖 Web Audio 失敗:", e);
+                console.warn("解鎖 Web Audio 警告:", e);
             }
 
-            // 1. 開啟載入狀態
+            // 1. 切換顯示
             placeholderTxt.style.display = 'none';
-            reportOutput.style.display = 'none';
-            loadingBox.style.display = 'flex';
-
-            // 向後端 API 發送分析請求
-            fetch('/api/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ text: input })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("後台伺服器回應異常");
-                }
-                return response.json();
-            })
-            .then(analysisResult => {
-                loadingBox.style.display = 'none';
-                reportOutput.style.display = 'block';
-                
-                // 渲染後端生成的分析報告
+            loadingBox.style.display = 'none';
+            
+            // 2. 本地分析與即時渲染報告 (0 秒延遲，絕不卡死)
+            try {
+                const analysisResult = analyzeSymptomLocal(input);
                 renderReport(analysisResult);
+                reportOutput.style.display = 'block';
 
-                // 自動加載對應的頻率，設定 1 分鐘定時，並開始播放！
-                currentFreq = parseInt(analysisResult.freq);
+                currentFreq = parseInt(analysisResult.freq) || 528;
                 setFrequencyUI(currentFreq);
-                
-                // 設定為 1 分鐘定時器
                 timerSelect.value = "1";
-                
-                // 啟動音樂
-                stopAudio(); // 清除舊節點
-                startAll();
-            })
-            .catch(err => {
-                console.error("身心分析出錯:", err);
-                loadingBox.style.display = 'none';
-                placeholderTxt.style.display = 'block';
-                alert("身心能量分析失敗，請確認後台伺服器已正常啟動！");
-            });
+
+                // 手機自動將畫面捲動至報告區域
+                setTimeout(() => {
+                    const el = document.getElementById('reportDisplay') || reportOutput;
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
+
+                // 嘗試啟動音律播放
+                try {
+                    stopAudio();
+                    startAll();
+                } catch (audioErr) {
+                    console.warn("自動播放音效受限:", audioErr);
+                }
+            } catch (err) {
+                console.error("分析過程異常:", err);
+                reportOutput.style.display = 'block';
+            }
+        }
+
+        analyzeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            runAnalysis();
         });
 
         // 渲染報告 HTML 結構
@@ -1691,11 +1896,11 @@
             recognition.onerror = (event) => {
                 console.error("語音辨識出錯:", event.error);
                 if (event.error === 'not-allowed') {
-                    alert("【權限錯誤】麥克風存取被拒絕。請在瀏覽器網址列左側點擊「鎖頭」圖示，並開啟麥克風權限！");
+                    alert("【麥克風權限提示】\n1. 若您是在 LINE 視窗內，請點選右下角「...」選擇「在 Safari 開啟」。\n2. 或是請直接點擊文字輸入框，按 iPhone 鍵盤右下角的「麥克風按鈕」進行語音聽寫！");
                 } else if (window.location.protocol === 'file:') {
-                    alert("【安全限制】現代瀏覽器（如 Chrome）基於安全政策，禁止本機網頁檔案 (file://) 使用語音辨識服務。\n\n請改用「部署後的 https 網址」進行測試，或是使用手動輸入文字喔！");
+                    alert("【安全限制】本機網頁檔案 (file://) 禁止使用語音辨識，請改用線上網頁版。");
                 } else {
-                    alert("語音辨識失敗 (錯誤碼: " + event.error + ")，請嘗試手動輸入文字。");
+                    alert("【語音輸入提示】\niPhone 用戶建議直接點擊輸入框，使用鍵盤右下角的「麥克風圖示」進行語音聽寫，辨識最快速穩定！");
                 }
                 stopListening();
             };
@@ -1704,8 +1909,11 @@
                 stopListening();
             };
         } else {
-            // 瀏覽器不支援時隱藏麥克風按鈕
-            micBtn.style.display = 'none';
+            // iOS Safari 舊版或 LINE 內建瀏覽器不支援 WebSpeech API 時的提示
+            micBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert("💡 【iPhone 語音輸入技巧】\n請直接點擊上方文字框，並按 iPhone 螢幕鍵盤右下角的「麥克風圖示」，即可直接語音轉文字！");
+            });
         }
 
         function stopListening() {
@@ -1714,22 +1922,30 @@
             symptomInput.placeholder = "例如：我的狗失蹤了三天，我現在好急、好難過，整晚失眠，胸口感覺很悶...";
         }
 
-        micBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (!recognition) return;
-            
-            try {
-                if (isListening) {
-                    recognition.stop();
-                } else {
-                    recognition.start();
+        if (recognition) {
+            micBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // 檢查是否在 LINE 內建瀏覽器中
+                const ua = navigator.userAgent.toLowerCase();
+                if (ua.includes('line')) {
+                    alert("💡 【LINE 視窗提醒】\nLINE 內建瀏覽器限制了網頁麥克風存取。\n請點擊右下角「...」選擇「在 Safari 開啟」，或直接點擊輸入框使用鍵盤內建的麥克風聽寫！");
+                    return;
                 }
-            } catch (err) {
-                console.error("語音辨識啟動錯誤:", err);
-                alert("【啟動錯誤】無法啟動語音辨識服務。\n\n原因可能是：\n1. 麥克風已被其他程式佔用。\n2. 您在 LINE/WeChat 等應用程式內建瀏覽器中開啟（請點擊右上角選單改用 Safari 或 Chrome 開啟）。\n3. 網址不是安全加密網址 (https)。\n\n建議您直接手動輸入文字！");
-                stopListening();
-            }
-        });
+
+                try {
+                    if (isListening) {
+                        recognition.stop();
+                    } else {
+                        recognition.start();
+                    }
+                } catch (err) {
+                    console.error("語音辨識啟動錯誤:", err);
+                    alert("💡 【語音輸入提示】\n請直接點擊文字框，使用 iPhone 鍵盤右下角的「麥克風聽寫圖示」，辨識最精準！");
+                    stopListening();
+                }
+            });
+        }
     
         // 初始化付費按鈕事件
         
@@ -1799,6 +2015,89 @@
                 }
             });
         }
+
+        // 註冊 PWA Service Worker (離線快取)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('PWA Service Worker 註冊成功:', reg.scope))
+                    .catch(err => console.warn('PWA Service Worker 註冊失敗:', err));
+            });
+        }
+
+        // 10 天免費試用與 VIP 邀請碼解鎖邏輯
+        (function initTrialLogic() {
+            const TRIAL_DAYS = 10;
+            const VALID_CODES = ['XIYANYU888', 'AURA2026', 'HEALING888', 'AURA888', 'JUNG888'];
+            
+            const now = Date.now();
+            let trialStart = safeStorage.getItem('auraharmonic_trial_start');
+            let isVIP = safeStorage.getItem('auraharmonic_is_vip') === 'true';
+
+            if (!trialStart) {
+                trialStart = now;
+                safeStorage.setItem('auraharmonic_trial_start', trialStart);
+            } else {
+                trialStart = parseInt(trialStart, 10);
+            }
+
+            const elapsedDays = Math.floor((now - trialStart) / (1000 * 60 * 60 * 24));
+            const remainingDays = Math.max(0, TRIAL_DAYS - elapsedDays);
+
+            const badge = document.getElementById('trialBadge');
+            const modal = document.getElementById('trialModal');
+
+            if (isVIP) {
+                if (badge) {
+                    badge.innerHTML = '✨ VIP 尊榮版 (終身開通)';
+                    badge.style.borderColor = 'rgba(230, 215, 159, 0.8)';
+                    badge.style.color = '#bfaf75';
+                }
+            } else {
+                if (badge) {
+                    if (remainingDays > 0) {
+                        badge.innerHTML = `🎁 10天免費試用（剩餘 ${remainingDays} 天）`;
+                    } else {
+                        badge.innerHTML = `⚠️ 試用期已屆滿（點擊開通）`;
+                        badge.style.borderColor = '#df9f9f';
+                        badge.style.color = '#b97676';
+                    }
+                    badge.addEventListener('click', () => {
+                        if (modal) modal.style.display = 'flex';
+                    });
+                }
+
+                if (remainingDays <= 0) {
+                    if (modal) modal.style.display = 'flex';
+                }
+            }
+
+            // 啟用碼驗證解鎖
+            const unlockBtn = document.getElementById('vipUnlockBtn');
+            const codeInput = document.getElementById('vipCodeInput');
+            const codeMsg = document.getElementById('vipCodeMsg');
+
+            if (unlockBtn && codeInput) {
+                unlockBtn.addEventListener('click', () => {
+                    const val = codeInput.value.trim().toUpperCase();
+                    if (VALID_CODES.includes(val)) {
+                        safeStorage.setItem('auraharmonic_is_vip', 'true');
+                        if (codeMsg) {
+                            codeMsg.style.color = '#859473';
+                            codeMsg.innerText = '🎉 驗證成功！已升級為 VIP 尊榮終身版。';
+                        }
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        if (codeMsg) {
+                            codeMsg.style.color = '#df9f9f';
+                            codeMsg.innerText = '❌ 邀請碼無效，請檢查後重試或聯繫創辦人。';
+                        }
+                    }
+                });
+            }
+        })();
     
 </script>
 </body>

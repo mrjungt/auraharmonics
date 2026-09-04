@@ -2,19 +2,19 @@
   "name": "AuraHarmonic ── 互動式身心療癒儀",
   "short_name": "AuraHarmonic",
   "description": "自然療癒與索爾費吉歐頻率聲學合成儀 (396Hz~852Hz / 雙耳節拍 / 4-7-8 呼吸引導)",
-  "start_url": "./share/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#3e3532",
   "theme_color": "#3e3532",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "../icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "../icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
