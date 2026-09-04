@@ -1877,11 +1877,11 @@
             recognition.onerror = (event) => {
                 console.error("語音辨識出錯:", event.error);
                 if (event.error === 'not-allowed') {
-                    alert("【權限錯誤】麥克風存取被拒絕。請在瀏覽器網址列左側點擊「鎖頭」圖示，並開啟麥克風權限！");
+                    alert("【麥克風權限提示】\n1. 若您是在 LINE 視窗內，請點選右下角「...」選擇「在 Safari 開啟」。\n2. 或是請直接點擊文字輸入框，按 iPhone 鍵盤右下角的「麥克風按鈕」進行語音聽寫！");
                 } else if (window.location.protocol === 'file:') {
-                    alert("【安全限制】現代瀏覽器（如 Chrome）基於安全政策，禁止本機網頁檔案 (file://) 使用語音辨識服務。\n\n請改用「部署後的 https 網址」進行測試，或是使用手動輸入文字喔！");
+                    alert("【安全限制】本機網頁檔案 (file://) 禁止使用語音辨識，請改用線上網頁版。");
                 } else {
-                    alert("語音辨識失敗 (錯誤碼: " + event.error + ")，請嘗試手動輸入文字。");
+                    alert("【語音輸入提示】\niPhone 用戶建議直接點擊輸入框，使用鍵盤右下角的「麥克風圖示」進行語音聽寫，辨識最快速穩定！");
                 }
                 stopListening();
             };
@@ -1890,8 +1890,11 @@
                 stopListening();
             };
         } else {
-            // 瀏覽器不支援時隱藏麥克風按鈕
-            micBtn.style.display = 'none';
+            // iOS Safari 舊版或 LINE 內建瀏覽器不支援 WebSpeech API 時的提示
+            micBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert("💡 【iPhone 語音輸入技巧】\n請直接點擊上方文字框，並按 iPhone 螢幕鍵盤右下角的「麥克風圖示」，即可直接語音轉文字！");
+            });
         }
 
         function stopListening() {
@@ -1900,22 +1903,30 @@
             symptomInput.placeholder = "例如：我的狗失蹤了三天，我現在好急、好難過，整晚失眠，胸口感覺很悶...";
         }
 
-        micBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (!recognition) return;
-            
-            try {
-                if (isListening) {
-                    recognition.stop();
-                } else {
-                    recognition.start();
+        if (recognition) {
+            micBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // 檢查是否在 LINE 內建瀏覽器中
+                const ua = navigator.userAgent.toLowerCase();
+                if (ua.includes('line')) {
+                    alert("💡 【LINE 視窗提醒】\nLINE 內建瀏覽器限制了網頁麥克風存取。\n請點擊右下角「...」選擇「在 Safari 開啟」，或直接點擊輸入框使用鍵盤內建的麥克風聽寫！");
+                    return;
                 }
-            } catch (err) {
-                console.error("語音辨識啟動錯誤:", err);
-                alert("【啟動錯誤】無法啟動語音辨識服務。\n\n原因可能是：\n1. 麥克風已被其他程式佔用。\n2. 您在 LINE/WeChat 等應用程式內建瀏覽器中開啟（請點擊右上角選單改用 Safari 或 Chrome 開啟）。\n3. 網址不是安全加密網址 (https)。\n\n建議您直接手動輸入文字！");
-                stopListening();
-            }
-        });
+
+                try {
+                    if (isListening) {
+                        recognition.stop();
+                    } else {
+                        recognition.start();
+                    }
+                } catch (err) {
+                    console.error("語音辨識啟動錯誤:", err);
+                    alert("💡 【語音輸入提示】\n請直接點擊文字框，使用 iPhone 鍵盤右下角的「麥克風聽寫圖示」，辨識最精準！");
+                    stopListening();
+                }
+            });
+        }
     
         // 初始化付費按鈕事件
         
