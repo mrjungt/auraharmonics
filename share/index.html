@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraHarmonic ── 互動式身心療癒與聲學合成儀</title>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#3e3532">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="../icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-                                        :root {
+        :root {
             --bg-color: #3e3532;
             --card-bg: rgba(255, 250, 245, 0.92);
             --card-border: rgba(197, 179, 157, 0.25);
@@ -23,6 +28,104 @@
             --color-852: linear-gradient(135deg, #bbaec8, #91829e); /* 眉心輪 暖調紫 */
             
             --active-glow: var(--color-417);
+        }
+
+        /* 10 天免費試用標籤與彈窗樣式 */
+        .trial-badge {
+            position: fixed;
+            top: 15px;
+            right: 20px;
+            background: rgba(255, 250, 245, 0.95);
+            border: 1px solid rgba(202, 122, 101, 0.4);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            color: #362e2b;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(54, 46, 43, 0.15);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .trial-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 46, 43, 0.2);
+        }
+
+        .trial-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(42, 40, 47, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .trial-modal-card {
+            width: 90%;
+            max-width: 440px;
+            background: rgba(255, 250, 245, 0.98);
+            border: 1px solid rgba(197, 179, 157, 0.3);
+            border-radius: 28px;
+            padding: 35px 30px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(54, 46, 43, 0.3);
+            box-sizing: border-box;
+        }
+
+        .trial-modal-card h3 {
+            font-size: 1.35rem;
+            color: #362e2b;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .trial-modal-desc {
+            font-size: 0.9rem;
+            color: #7a6e67;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .vip-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .vip-input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 14px;
+            border: 1px solid rgba(197, 179, 157, 0.4);
+            background: #f2e8dc;
+            font-size: 0.9rem;
+            color: #362e2b;
+            outline: none;
+        }
+
+        .vip-unlock-btn {
+            padding: 12px 20px;
+            background: var(--active-glow);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .vip-unlock-btn:hover {
+            opacity: 0.9;
         }
 
         * {
@@ -831,6 +934,29 @@
         <path d="M58,43 Q75,38 73,28 Q60,33 58,43 Z" />
     </svg>
 
+
+    <!-- 10天免費試用標籤 -->
+    <div class="trial-badge" id="trialBadge">🎁 10天免費試用</div>
+
+    <!-- 試用期滿 / VIP 解鎖彈窗 -->
+    <div class="trial-modal-overlay" id="trialModal" style="display:none;">
+        <div class="trial-modal-card">
+            <h3>🌸 10天免費體驗已屆滿</h3>
+            <p class="trial-modal-desc">
+                感謝您參與 <strong>AuraHarmonic 身心療癒儀</strong> 體驗！<br>
+                您的 10 天免費試用期已結束。<br>
+                請輸入 VIP 邀請碼解鎖全功能，或聯繫創辦人開通。
+            </p>
+            <div class="vip-input-group">
+                <input type="text" id="vipCodeInput" placeholder="請輸入 VIP 邀請碼 (如: VIP888)">
+                <button id="vipUnlockBtn" class="vip-unlock-btn">解鎖開通</button>
+            </div>
+            <div id="vipCodeMsg" style="font-size:0.85rem; margin-top:8px; font-weight:600;"></div>
+            <div style="font-size:0.8rem; color:#7a6e67; margin-top:15px;">
+                💡 試用邀請碼：可輸入 <strong>VIP888</strong> 或 <strong>AURA2026</strong> 開通終身版
+            </div>
+        </div>
+    </div>
 
     <div class="background-glow" id="bgGlow"></div>
 
@@ -1858,7 +1984,88 @@
                     if (isPlaying) stopAll();
                 }
             });
+        // 註冊 PWA Service Worker (離線快取)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('PWA Service Worker 註冊成功:', reg.scope))
+                    .catch(err => console.warn('PWA Service Worker 註冊失敗:', err));
+            });
         }
+
+        // 10 天免費試用與 VIP 邀請碼解鎖邏輯
+        (function initTrialLogic() {
+            const TRIAL_DAYS = 10;
+            const VALID_CODES = ['VIP888', 'AURA2026', 'HEALING888', 'AURA888', 'JUNG888'];
+            
+            const now = Date.now();
+            let trialStart = localStorage.getItem('auraharmonic_trial_start');
+            let isVIP = localStorage.getItem('auraharmonic_is_vip') === 'true';
+
+            if (!trialStart) {
+                trialStart = now;
+                localStorage.setItem('auraharmonic_trial_start', trialStart);
+            } else {
+                trialStart = parseInt(trialStart, 10);
+            }
+
+            const elapsedDays = Math.floor((now - trialStart) / (1000 * 60 * 60 * 24));
+            const remainingDays = Math.max(0, TRIAL_DAYS - elapsedDays);
+
+            const badge = document.getElementById('trialBadge');
+            const modal = document.getElementById('trialModal');
+
+            if (isVIP) {
+                if (badge) {
+                    badge.innerHTML = '✨ VIP 尊榮版 (終身開通)';
+                    badge.style.borderColor = 'rgba(230, 215, 159, 0.8)';
+                    badge.style.color = '#bfaf75';
+                }
+            } else {
+                if (badge) {
+                    if (remainingDays > 0) {
+                        badge.innerHTML = `🎁 10天免費試用（剩餘 ${remainingDays} 天）`;
+                    } else {
+                        badge.innerHTML = `⚠️ 試用期已屆滿（點擊開通）`;
+                        badge.style.borderColor = '#df9f9f';
+                        badge.style.color = '#b97676';
+                    }
+                    badge.addEventListener('click', () => {
+                        if (modal) modal.style.display = 'flex';
+                    });
+                }
+
+                if (remainingDays <= 0) {
+                    if (modal) modal.style.display = 'flex';
+                }
+            }
+
+            // 啟用碼驗證解鎖
+            const unlockBtn = document.getElementById('vipUnlockBtn');
+            const codeInput = document.getElementById('vipCodeInput');
+            const codeMsg = document.getElementById('vipCodeMsg');
+
+            if (unlockBtn && codeInput) {
+                unlockBtn.addEventListener('click', () => {
+                    const val = codeInput.value.trim().toUpperCase();
+                    if (VALID_CODES.includes(val)) {
+                        localStorage.setItem('auraharmonic_is_vip', 'true');
+                        if (codeMsg) {
+                            codeMsg.style.color = '#859473';
+                            codeMsg.innerText = '🎉 驗證成功！已升級為 VIP 尊榮終身版。';
+                        }
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        if (codeMsg) {
+                            codeMsg.style.color = '#df9f9f';
+                            codeMsg.innerText = '❌ 邀請碼無效，請檢查後重試或聯繫創辦人。';
+                        }
+                    }
+                });
+            }
+        })();
     
 </script>
 </body>
