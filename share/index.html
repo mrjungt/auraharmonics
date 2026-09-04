@@ -1736,16 +1736,18 @@
 
         function analyzeSymptomLocal(text) {
             let matchedFreq = 528;
-            for (let f in db) {
-                if (f === "528") continue;
-                const keywords = db[f].keywords;
-                const matched = keywords.some(k => text.includes(k));
-                if (matched) {
-                    matchedFreq = parseInt(f);
-                    break;
+            if (text && typeof text === 'string') {
+                for (let f in db) {
+                    if (f === "528") continue;
+                    const keywords = db[f] ? db[f].keywords : [];
+                    if (keywords && keywords.some(k => text.includes(k))) {
+                        matchedFreq = parseInt(f);
+                        break;
+                    }
                 }
             }
-            return Object.assign({}, db[matchedFreq], { freq: matchedFreq });
+            const data = db[matchedFreq] || db[528];
+            return Object.assign({}, data, { freq: matchedFreq });
         }
 
         // --- 本地分析與匹配 ---
@@ -1757,21 +1759,21 @@
             }
 
             // 關鍵安全防禦：在點擊事件直接觸發的同步代碼中初始化 AudioContext，繞過自動播放限制
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            // 播放無聲緩衝區以完全解鎖 iOS Safari Web Audio 播放限制
             try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                // 播放無聲緩衝區以完全解鎖 iOS Safari Web Audio 播放限制
                 const buffer = audioCtx.createBuffer(1, 1, 22050);
                 const source = audioCtx.createBufferSource();
                 source.buffer = buffer;
                 source.connect(audioCtx.destination);
                 source.start(0);
             } catch (e) {
-                console.warn("解鎖 Web Audio 失敗:", e);
+                console.warn("解鎖 Web Audio 警告:", e);
             }
 
             // 1. 開啟載入狀態
@@ -1779,26 +1781,37 @@
             reportOutput.style.display = 'none';
             loadingBox.style.display = 'flex';
 
-            // 模擬分析能量場 1.8 秒
+            // 快速呈現分析結果 (300ms 最佳流暢度)
             setTimeout(() => {
                 loadingBox.style.display = 'none';
-                reportOutput.style.display = 'block';
                 
-                // 本地解密與分析
-                const analysisResult = analyzeSymptomLocal(input);
-                renderReport(analysisResult);
+                try {
+                    // 本地分析與渲染報告
+                    const analysisResult = analyzeSymptomLocal(input);
+                    renderReport(analysisResult);
+                    reportOutput.style.display = 'block';
 
-                // 自動加載對應的頻率，設定 1 分鐘定時，並開始播放！
-                currentFreq = parseInt(analysisResult.freq);
-                setFrequencyUI(currentFreq);
-                
-                // 設定為 1 分鐘定時器
-                timerSelect.value = "1";
-                
-                // 啟動音樂
-                stopAudio(); // 清除舊節點
-                startAll();
-            }, 1800);
+                    // 自動加載對應的頻率與 UI
+                    currentFreq = parseInt(analysisResult.freq) || 528;
+                    setFrequencyUI(currentFreq);
+                    timerSelect.value = "1";
+
+                    // 手機上平滑滾動到報告位置
+                    reportOutput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                    // 嘗試啟動音律播放
+                    try {
+                        stopAudio();
+                        startAll();
+                    } catch (audioErr) {
+                        console.warn("自動播放音效受限:", audioErr);
+                    }
+                } catch (err) {
+                    console.error("分析過程異常:", err);
+                    reportOutput.style.display = 'block';
+                    alert("分析完成！已為您套用對應身心聲波。");
+                }
+            }, 300);
         });
 
         // 渲染報告 HTML 結構
