@@ -438,7 +438,7 @@
             line-height: 1;
         }
 
-        /* SVG 倒數進度環 */
+        /* SVG 倒數進度環 (升級加粗與發光) */
         .breath-ring {
             position: absolute;
             width: 180px;
@@ -448,21 +448,22 @@
         }
 
         .ring-track {
-            stroke: rgba(197, 179, 157, 0.15);
-            stroke-width: 4px;
+            stroke: rgba(255, 250, 245, 0.12);
+            stroke-width: 10px;
             fill: none;
         }
 
         .ring-progress {
-            stroke: var(--accent-color);
-            stroke-width: 4px;
+            stroke: #ff7a5a;
+            stroke-width: 10px;
             fill: none;
             stroke-linecap: round;
             stroke-dasharray: 502;
             stroke-dashoffset: 502;
             transform: rotate(-90deg);
             transform-origin: 90px 90px;
-            transition: stroke-dashoffset 0.1s linear, stroke 0.8s ease;
+            transition: stroke-dashoffset 0.1s linear, stroke 0.5s ease, filter 0.5s ease;
+            filter: drop-shadow(0 0 12px rgba(255, 122, 90, 0.85));
         }
 
         /* 能量擴散圈 */
@@ -1608,14 +1609,26 @@
                 if (phase === "inhale") {
                     breathTxt.innerText = "吸氣";
                     const offset = circumference - (circumference * (phaseElapsed / phaseDuration));
-                    if (progressRing) progressRing.style.strokeDashoffset = offset;
+                    if (progressRing) {
+                        progressRing.style.strokeDashoffset = offset;
+                        progressRing.style.stroke = "#ff6b4a"; // 鮮明活力珊瑚紅 (吸氣)
+                        progressRing.style.filter = "drop-shadow(0 0 14px rgba(255, 107, 74, 0.95))";
+                    }
                 } else if (phase === "hold") {
                     breathTxt.innerText = "屏息";
-                    if (progressRing) progressRing.style.strokeDashoffset = 0;
+                    if (progressRing) {
+                        progressRing.style.strokeDashoffset = 0;
+                        progressRing.style.stroke = "#f5d77f"; // 安定金黃 (屏息)
+                        progressRing.style.filter = "drop-shadow(0 0 14px rgba(245, 215, 127, 0.95))";
+                    }
                 } else if (phase === "exhale") {
                     breathTxt.innerText = "吐氣";
                     const offset = circumference * (phaseElapsed / phaseDuration);
-                    if (progressRing) progressRing.style.strokeDashoffset = offset;
+                    if (progressRing) {
+                        progressRing.style.strokeDashoffset = offset;
+                        progressRing.style.stroke = "#5ac8fa"; // 舒緩湖水天空藍 (吐氣)
+                        progressRing.style.filter = "drop-shadow(0 0 14px rgba(90, 200, 250, 0.95))";
+                    }
                 }
                 
                 breathAnimFrame = requestAnimationFrame(tick);
